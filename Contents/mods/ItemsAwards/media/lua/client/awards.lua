@@ -13,11 +13,11 @@ local function ZombKilled()
   for key, value in pairs(itemsAwards) do
     if ( countZombieKill == value.Kills ) then
       local itemName = getItemNameFromFullType(value.Item)
-      player:Say(string.format("You have won: %s. Count: %d", itemName, value.Count))
+      player:setHaloNote(string.format("You have won: %s. Count: %d", itemName, value.Count))
       player:getInventory():AddItems(value.Item, value.Count)
     end
   end
-  player:Say(string.format("[Items Awards]: Zombies killed: %d", countZombieKill))
+  player:setHaloNote(string.format("[Items Awards]: Zombies killed: %d", countZombieKill))
 end
 
 Events.OnZombieDead.Add(ZombKilled)

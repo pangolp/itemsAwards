@@ -1,0 +1,6 @@
+version=1
+id=2911373802
+title=Items Awards
+description=Get commendations for eliminating zombies.
+tags=Build 41
+visibility=unlisted
