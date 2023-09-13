@@ -1,0 +1,3 @@
+IGUI_ES = {
+  IGUI_WonItem = "[Items Awards]: Has ganado: %s. Cantidad: %d",
+}

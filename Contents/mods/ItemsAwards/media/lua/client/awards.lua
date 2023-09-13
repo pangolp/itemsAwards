@@ -1,23 +1,26 @@
 local itemsAwards = {
-  { Item = "Base.BaseballBatNails", Kills = 1, Count = 1 },
-  { Item = "Base.Money", Kills = 2, Count = 10 },
-  { Item = "Base.Trousers_CamoGreen", Kills = 10, Count = 1 },
-  { Item = "Base.Shoes_ArmyBoots", Kills = 15, Count = 1 },
-  { Item = "Base.Vest_BulletArmy", Kills = 20, Count = 1 },
-  { Item = "Base.Tshirt_CamoGreen", Kills = 25, Count = 1 }
+  {Item = "Base.VHS_Home", Number = 10, Count = 1}, -- Home VHS
+  {Item = "Base.HazmatSuit", Number = 20, Count = 1}, -- Hazmat Suit
+  {Item = "Base.EngineParts", Number = 30, Count = 1}, -- Spare Engine Parts
+  {Item = "Base.Hat_SantaHat", Number = 40, Count = 1}, -- Santa Hat
+  {Item = "Base.Hat_BunnyEarsWhite", Number = 50, Count = 1}, -- Bunny Ears
+  {Item = "Base.Hat_PartyHat_Stars", Number = 60, Count = 1}, -- Colored Party Hat
+  {Item = "Base.Katana", Number = 70, Count = 1}, -- Katana
+  {Item = "Base.CarKey", Number = 80, Count = 1}, -- Car Key
+  {Item = "Base.CombinationPadlock", Number = 90, Count = 1}, -- Combination Padlock
+  {Item = "Base.Machete", Number = 100, Count = 1}, -- Machete
 }
 
 local function ZombKilled()
   local player = getPlayer()
-  local countZombieKill = player:getZombieKills() + 1
+  local number = ZombRandBetween(1, 101)
   for key, value in pairs(itemsAwards) do
-    if ( countZombieKill == value.Kills ) then
+    if (number == value.Number) then
       local itemName = getItemNameFromFullType(value.Item)
-      player:setHaloNote(string.format("You have won: %s. Count: %d", itemName, value.Count))
       player:getInventory():AddItems(value.Item, value.Count)
     end
   end
-  player:setHaloNote(string.format("[Items Awards]: Zombies killed: %d", countZombieKill))
+  player:setHaloNote(string.format('Dado: %d', number), 255, 138, 113, 300)
 end
 
 Events.OnZombieDead.Add(ZombKilled)
