@@ -13,14 +13,14 @@ local itemsAwards = {
 
 local function ZombKilled()
   local player = getPlayer()
-  local number = ZombRandBetween(1, 101)
+  local number = ZombRandBetween(1, 301)
   for key, value in pairs(itemsAwards) do
     if (number == value.Number) then
       local itemName = getItemNameFromFullType(value.Item)
       player:getInventory():AddItems(value.Item, value.Count)
+      player:setHaloNote(string.format(getText("IGUI_WonItem"), itemName, value.Count))
     end
   end
-  player:setHaloNote(string.format('Dado: %d', number), 255, 138, 113, 300)
 end
 
 Events.OnZombieDead.Add(ZombKilled)
