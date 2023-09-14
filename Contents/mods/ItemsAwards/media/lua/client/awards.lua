@@ -13,7 +13,7 @@ local itemsAwards = {
 
 local function ZombKilled()
   local player = getPlayer()
-  local number = ZombRandBetween(1, 301)
+  local number = ZombRandBetween(1, 1001)
   for key, value in pairs(itemsAwards) do
     if (number == value.Number) then
       local itemName = getItemNameFromFullType(value.Item)
