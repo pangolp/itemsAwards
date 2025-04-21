@@ -1,3 +1,6 @@
+Awards = Awards or {}
+Awards.Options = Awards.Options or {}
+
 local itemsAwards = {
   {Item = "Base.BaseballBatNails", Number = 5, Count = 1}, -- Spiked Baseball Bat
   {Item = "Base.FishingRodBreak", Number = 10, Count = 1}, -- Fishing Rod without Line
@@ -66,21 +69,29 @@ local function ZombKilled(zombie)
   end
 
   local number = ZombRandBetween(1, 501)
-  --local won = false
+  local won = false
 
   for key, value in pairs(itemsAwards) do
     if (number == value.Number) then
       local itemName = getItemNameFromFullType(value.Item)
       zombie:getInventory():AddItems(value.Item, value.Count)
-      attacker:setHaloNote(string.format(getText("IGUI_WonItem"), itemName, value.Count))
-      --won = true
+      if Awards.Options.showMessageInChat then
+        attacker:Say(string.format(getText("IGUI_WonItem"), itemName, value.Count))
+      else
+        attacker:setHaloNote(string.format(getText("IGUI_WonItem"), itemName, value.Count))
+      end
+      won = true
       break
     end
   end
 
-  --if not won then
-  --  attacker:setHaloNote(string.format("Tu número fue: %d. ¡Sigue intentando!", number), 255, 0, 0, 300)
-  --end
+  if not won and Awards.Options.showNumberWhenLosing then
+    if Awards.Options.showMessageInChat then
+      attacker:Say(string.format("<RGB:255,0,0>Tu número fue: %d. ¡Sigue intentando!", number))
+    else
+      attacker:setHaloNote(string.format("Tu número fue: %d. ¡Sigue intentando!", number), 255, 0, 0, 300)
+    end
+  end
 end
 
 Events.OnZombieDead.Add(ZombKilled)
