@@ -7,7 +7,7 @@ Awards.Options.showMessageInChat = false
 if ModOptions and ModOptions.getInstance then
     local function onModOptionsApply(optionValues)
         Awards.Options.showNumberWhenLosing = optionValues.settings.options.showNumberWhenLosing
-        Awards.Options.showMessageInChat = optionValueoptionValues.settings.options.showMessageInChat
+        Awards.Options.showMessageInChat = optionValues.settings.options.showMessageInChat
     end
 
     local SETTINGS = {
