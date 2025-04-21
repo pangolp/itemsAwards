@@ -14,14 +14,14 @@ if ModOptions and ModOptions.getInstance then
         options_data = {
             showNumberWhenLosing = {
                 name = "UI_Awards_showNumberWhenLosing",
-                tooltip = "UI_Awards_showNumberWhenLosing_Tooltip",
+                tooltip = "Tooltip_Awards_showNumberWhenLosing",
                 default = false,
                 OnApplyMainMenu = onModOptionsApply,
                 OnApplyInGame = onModOptionsApply
             },
             showMessageInChat = {
                 name = "UI_Awards_showMessageInChat",
-                tooltip = "UI_Awards_showMessageInChat_Tooltip",
+                tooltip = "Tooltip_Awards_showMessageInChat",
                 default = false,
                 OnApplyMainMenu = onModOptionsApply,
                 OnApplyInGame = onModOptionsApply
