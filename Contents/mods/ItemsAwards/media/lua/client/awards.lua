@@ -87,9 +87,9 @@ local function ZombKilled(zombie)
 
   if not won and Awards.Options.showNumberWhenLosing then
     if Awards.Options.showMessageInChat then
-      attacker:Say(string.format("<RGB:255,0,0>Tu número fue: %d. ¡Sigue intentando!", number))
+      attacker:Say(string.format(getText("IGUI_LoseItem"), number))
     else
-      attacker:setHaloNote(string.format("Tu número fue: %d. ¡Sigue intentando!", number), 255, 0, 0, 300)
+      attacker:setHaloNote(string.format(getText("IGUI_LoseItem"), number), 255, 0, 0, 300)
     end
   end
 end
