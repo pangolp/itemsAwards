@@ -1,0 +1,4 @@
+Tooltip_ES = {
+    Tooltip_Awards_showNumberWhenLosing = "Habilita o deshabilita, la posibilidad de ver el dado perdedor. Por defecto, desactivado.",
+    Tooltip_Awards_showMessageInChat = "Habilita o deshabilita el mensaje en el chat. Por defecto, desactivado."
+}
