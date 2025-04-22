@@ -1,0 +1,4 @@
+Tooltip_EN = {
+    Tooltip_Awards_showNumberWhenLosing = "Enables or disables the ability to see the losing die. By default, disabled.",
+    Tooltip_Awards_showMessageInChat = "Enables or disables chat messaging. By default, disabled."
+}

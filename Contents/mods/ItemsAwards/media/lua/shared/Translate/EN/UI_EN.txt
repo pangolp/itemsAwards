@@ -1,0 +1,4 @@
+UI_EN = {
+    UI_Awards_showNumberWhenLosing = "Show dice when losing",
+    UI_Awards_showMessageInChat = "Show message in chat"
+}
