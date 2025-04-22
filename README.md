@@ -12,6 +12,14 @@ itemsAwards/
 |           |       |   `-- awardsOptions.lua
 |           |       `-- shared
 |           |           `-- Translate
+|           |               |-- AR
+|           |               |   |-- IG_UI_AR.txt
+|           |               |   |-- Tooltip_AR.txt
+|           |               |   `-- UI_AR.txt
+|           |               |-- EN
+|           |               |   |-- IG_UI_EN.txt
+|           |               |   |-- Tooltip_EN.txt
+|           |               |   `-- UI_EN.txt
 |           |               `-- ES
 |           |                   |-- IG_UI_ES.txt
 |           |                   |-- Tooltip_ES.txt
@@ -21,7 +29,7 @@ itemsAwards/
 |-- preview.png
 `-- workshop.txt
 
-9 directories, 9 files
+11 directories, 15 files
 ```
 
 The mod is simple. Every time a player kills a zombie, a code is executed that selects a random number. If the number matches one of the winning prizes, the prize is left in the zombie's body for the player to retrieve.
