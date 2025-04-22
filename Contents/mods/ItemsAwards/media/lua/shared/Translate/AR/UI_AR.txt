@@ -1,0 +1,4 @@
+UI_AR = {
+    UI_Awards_showNumberWhenLosing = "Mostrar dado al perder",
+    UI_Awards_showMessageInChat = "Mostrar mensaje en el chat"
+}
