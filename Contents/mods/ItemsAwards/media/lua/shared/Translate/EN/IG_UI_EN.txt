@@ -1,4 +1,10 @@
 IGUI_EN = {
   IGUI_WonItem = "[Items Awards]: You have won: %s. Amount: %d",
   IGUI_LoseItem = "Your number was: %of. Keep trying!",
+  UI_welcomeawards = "Welcome to Items & Awards!",
+  UI_version = "Version",
+  UI_instructions = "Here is the record of what was won.",
+  UI_close = "Close",
+  UI_pressF10 = "Press F10 to open/close this window",
+  UI_awards_button_tooltip = "Open/Close Awards Window",
 }
