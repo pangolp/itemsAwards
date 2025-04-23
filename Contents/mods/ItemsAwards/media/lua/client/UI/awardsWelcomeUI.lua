@@ -110,12 +110,13 @@ function CreateWelcomeWindow()
     local screenH = getCore():getScreenHeight()
     local width = 400
     local height = 300
-    local x = (screenW - width) / 2
+    local x = (screenW - width) / 2 + 400
     local y = (screenH - height) / 2
 
     awardsWelcomeWindow = AwardsWelcomeUI:new(x, y, width, height)
     awardsWelcomeWindow:initialise()
     awardsWelcomeWindow:addToUIManager()
+    awardsWelcomeWindow:setVisible(false)
 end
 
 AwardsHUDButton = ISButton:derive("AwardsHUDButton")
@@ -123,7 +124,7 @@ AwardsHUDButton.instance = nil
 
 function AwardsHUDButton:new(x, y, width, height)
 
-    local o = ISButton:new(x, y, width, height, "★", nil, function()
+    local o = ISButton:new(x, y, width, height, "", nil, function()
         if awardsWelcomeWindow and awardsWelcomeWindow:isVisible() then
             awardsWelcomeWindow:setVisible(false)
             awardsWelcomeWindow:removeFromUIManager()
@@ -139,17 +140,19 @@ function AwardsHUDButton:new(x, y, width, height)
 
     setmetatable(o, self)
     self.__index = self
-    o.backgroundColor = {r=0.1, g=0.1, b=0.1, a=0.8}
-    o.backgroundColorMouseOver = {r=0.3, g=0.3, b=0.3, a=0.8}
-    o.borderColor = {r=1, g=1, b=1, a=0.3}
+
+    o:setImage(getTexture("media/ui/icons/gift_regular_icon.png"))
+    o.backgroundColor = {r=0, g=0, b=0, a=0}
+    o.backgroundColorMouseOver = {r=1, g=1, b=1, a=0.1}
+    o.borderColor = {r=0, g=0, b=0, a=0}
     return o
 end
 
 local function createHUDButton()
     if AwardsHUDButton.instance then return end
     local btnSize = 32
-    local x = getCore():getScreenWidth() - btnSize - 20
-    local y = 20
+    local x = getCore():getScreenWidth() - btnSize - 80
+    local y = 100
 
     local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
     btn:setAnchorLeft(false)
