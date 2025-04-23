@@ -1,4 +1,4 @@
 IGUI_AR = {
-  IGUI_WonItem = "[Items Awards]: Has ganado: %s. Cantidad: %d",
-  IGUI_LoseItem = "Tu número fue: %d. ¡Sigue intentando!",
+    IGUI_WonItem = "[Items Awards]: Has ganado: %s. Cantidad: %d",
+    IGUI_LoseItem = "Tu número fue: %d. ¡Sigue intentando!",
 }
