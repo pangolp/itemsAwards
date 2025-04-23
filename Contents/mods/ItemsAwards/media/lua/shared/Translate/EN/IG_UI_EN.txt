@@ -1,4 +1,5 @@
 IGUI_EN = {
     IGUI_WonItem = "[Items Awards]: You have won: %s. Amount: %d",
-    IGUI_LoseItem = "Your number was: %of. Keep trying!",
+    IGUI_LoseItem = "[Items Awards]: Your number was: %of. Keep trying!",
+    IGUI_YouNeedMoreKills = "[Items Awards]: You won with %d, but the prize requires more kills: %d",
 }
