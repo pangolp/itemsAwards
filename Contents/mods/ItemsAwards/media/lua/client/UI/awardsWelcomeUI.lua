@@ -116,6 +116,7 @@ function CreateWelcomeWindow()
     awardsWelcomeWindow = AwardsWelcomeUI:new(x, y, width, height)
     awardsWelcomeWindow:initialise()
     awardsWelcomeWindow:addToUIManager()
+    awardsWelcomeWindow:setVisible(false)
 end
 
 AwardsHUDButton = ISButton:derive("AwardsHUDButton")
@@ -165,6 +166,14 @@ local function createHUDButton()
 end
 
 local function OnGameStart()
+
+    Events.OnTick.Add(function()
+        if not awardsWelcomeWindow then
+            CreateWelcomeWindow()
+            Events.OnTick.Remove(this)
+        end
+    end)
+
     createHUDButton()
 end
 
