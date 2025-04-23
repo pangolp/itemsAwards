@@ -3,7 +3,7 @@ Awards.Options = Awards.Options or {}
 
 local itemsAwards = {
     {Item = "Base.BaseballBatNails", Number = 5, Count = 1}, -- Spiked Baseball Bat
-    {Item = "Base.FishingRodBreak", Number = 10, Count = 1}, -- Fishing Rod without Line
+    {Item = "Base.FishingRodTwineLine", Number = 10, Count = 1}, -- Fishing Rod
     {Item = "Base.MetalBar", Number = 15, Count = 3}, -- Metal Bar
     {Item = "Base.MetalPipe", Number = 20, Count = 3}, -- Metal Pipe
     {Item = "Base.Katana", Number = 25, Count = 1}, -- Katana
@@ -33,7 +33,7 @@ local itemsAwards = {
     {Item = "Base.Bag_ALICEpack_Army", Number = 145, Count = 1}, -- Military Backpack
     {Item = "Base.Bag_SurvivorBag", Number = 150, Count = 1}, -- Large Backpack
     {Item = "Base.Bag_ALICEpack", Number = 155, Count = 1}, -- Large Backpack
-    {Item = "Base.WaterMugSpiffo", Number = 160, Count = 1}, -- Mug of Water
+    {Item = "Base.MugSpiffo", Number = 160, Count = 1}, -- Empty Spiffo Mug
     {Item = "Base.CarBatteryCharger", Number = 165, Count = 1}, -- Car Battery Charger
     {Item = "Base.WoodAxe", Number = 170, Count = 1}, -- Wood Axe
     {Item = "Base.BoxOfJars", Number = 175, Count = 1}, -- Box of Jars
