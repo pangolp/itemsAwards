@@ -1,5 +1,23 @@
 # Items Awards
 
+- The idea of ​​the mod is simple. Every time a person kills a zombie, a script is executed internally, which obtains a random number, currently between 1 and 500. If that number matches any of the winning prizes within the table, a message is displayed to the player and the item is left on the zombie's body (so the player has to search among the bodies).
+
+In addition, we are actively working to improve the code and add new features. For example, we recently added two new features:
+
+- The ability to configure some options, thanks to the "options" mode.
+- A viewer with the history of items obtained during the session.
+
+It's important to note that, for now, there are two options:
+
+- View the losing dice
+- Change the format in which this message is displayed.
+
+(But we'll probably add more later)
+
+Regarding the viewer, the history is currently maintained while the user is on the server.
+
+When the user leaves, disconnects, or loses connection, the history is reset.
+
 ```
 itemsAwards/
 |-- Contents
@@ -8,6 +26,8 @@ itemsAwards/
 |           |-- media
 |           |   `-- lua
 |           |       |-- client
+|           |       |   |-- UI
+|           |       |   |   `-- awardsWelcomeUI.lua
 |           |       |   |-- awards.lua
 |           |       |   `-- awardsOptions.lua
 |           |       `-- shared
@@ -29,20 +49,8 @@ itemsAwards/
 |-- preview.png
 `-- workshop.txt
 
-11 directories, 15 files
+12 directories, 16 files
 ```
-
-The mod is simple. Every time a player kills a zombie, a code is executed that selects a random number. If the number matches one of the winning prizes, the prize is left in the zombie's body for the player to retrieve.
-
-Currently, the option mode has been added as a dependency to allow for some client-side options, such as displaying a message when a die rolls that isn't the winner, or enabling chat messages.
-
-With the recent changes, the idea is to continue adding more options and personalizing the experience as much as possible.
-
-![20230102032411_1](https://user-images.githubusercontent.com/2810187/210256470-4a2cb022-2120-40df-8744-716040b9941f.jpg)
-
-![20230102032427_1](https://user-images.githubusercontent.com/2810187/210256475-489d594a-ce3f-4a39-8609-aef5be02977e.jpg)
-
-![20230102032433_1](https://user-images.githubusercontent.com/2810187/210256479-71b96a37-a331-4e6f-b592-c3311ad608f4.jpg)
 
 #### External link
 * [Steam WorkShop](https://steamcommunity.com/sharedfiles/filedetails/?id=2911373802)

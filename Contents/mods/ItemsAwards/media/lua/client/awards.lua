@@ -61,26 +61,20 @@ local itemsAwards = {
     {Item = "Base.VHS_Home", Number = 290, Count = 1}, -- VHS Home
 }
 
--- Función principal que maneja la muerte de zombies
 local function ZombKilled(zombie)
-    -- Verificar si hay un atacante válido
     local attacker = zombie:getAttackedBy()
     if attacker == nil or not instanceof(attacker, "IsoPlayer") or attacker:getVehicle() ~= nil then
         return
     end
 
-    -- Generar número aleatorio para premios
     local number = ZombRandBetween(1, 501)
     local won = false
 
-    -- Verificar si ganó algún premio
     for key, value in pairs(itemsAwards) do
         if (number == value.Number) then
-            -- Obtener el nombre del item y agregarlo al inventario
             local itemName = getItemNameFromFullType(value.Item)
             zombie:getInventory():AddItems(value.Item, value.Count)
 
-            -- Mostrar mensaje al jugador
             local message = string.format(getText("IGUI_WonItem"), itemName, value.Count)
             if Awards.Options.showMessageInChat then
                 attacker:Say(message)
@@ -88,15 +82,12 @@ local function ZombKilled(zombie)
                 attacker:setHaloNote(message)
             end
 
-            -- Agregar mensaje al log y a la UI
             local awardMessage = itemName .. " x" .. value.Count
-            
-            -- Agregar al log personalizado si existe la función
+
             if AddAwardsLogMessage then
                 AddAwardsLogMessage(awardMessage)
             end
 
-            -- Agregar a la UI si existe la función
             if AddAwardMessageToUI then
                 AddAwardMessageToUI(awardMessage)
             end
@@ -106,7 +97,6 @@ local function ZombKilled(zombie)
         end
     end
 
-    -- Mostrar mensaje de pérdida si está configurado
     if not won and Awards.Options.showNumberWhenLosing then
         local message = string.format(getText("IGUI_LoseItem"), number)
         if Awards.Options.showMessageInChat then
@@ -117,5 +107,4 @@ local function ZombKilled(zombie)
     end
 end
 
--- Registrar el evento
 Events.OnZombieDead.Add(ZombKilled)
