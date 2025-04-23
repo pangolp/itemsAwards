@@ -43,9 +43,23 @@ function AwardsWelcomeUI:create()
         AwardsWelcomeUI.onCloseClick
     )
 
+    self.cleanButton = ISButton:new(
+        self:getWidth() - btnWidth - 120,
+        self:getHeight() - btnHeight - 10,
+        btnWidth,
+        btnHeight,
+        getText("UI_clean"),
+        self,
+        AwardsWelcomeUI.onCleanClick
+    )
+
     self.closeButton:initialise()
     self.closeButton:instantiate()
     self:addChild(self.closeButton)
+
+    self.cleanButton:initialise()
+    self.cleanButton:instantiate()
+    self:addChild(self.cleanButton)
 end
 
 function AwardsWelcomeUI:drawAwardItem(y, item, alt)
@@ -64,6 +78,11 @@ end
 function AwardsWelcomeUI:onAwardClick(item) end
 
 function AwardsWelcomeUI:onCloseClick()
+    self:setVisible(false)
+    self:removeFromUIManager()
+end
+
+function AwardsWelcomeUI:onCleanClick()
     self:setVisible(false)
     self:removeFromUIManager()
 end
