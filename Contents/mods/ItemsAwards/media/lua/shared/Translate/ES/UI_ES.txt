@@ -8,4 +8,5 @@ UI_ES = {
     UI_pressF10 = "Presiona F10 para abrir/cerrar esta ventana",
     UI_awards_button_tooltip = "Abrir/Cerrar Ventana de Premios",
     UI_clean = "Limpiar",
+    UI_awardMessage = "Item: %s - Cantidad: %d",
 }
