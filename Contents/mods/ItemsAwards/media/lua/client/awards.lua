@@ -62,7 +62,9 @@ local itemsAwards = {
 }
 
 local function ZombKilled(zombie)
+
     local attacker = zombie:getAttackedBy()
+
     if attacker == nil or not instanceof(attacker, "IsoPlayer") or attacker:getVehicle() ~= nil then
         return
     end
@@ -72,12 +74,15 @@ local function ZombKilled(zombie)
     local won = false
 
     for key, value in pairs(itemsAwards) do
+
         if (number == value.Number) then
+
             if (countZombieKill >= value.zkills) then
+
                 local itemName = getItemNameFromFullType(value.Item)
                 zombie:getInventory():AddItems(value.Item, value.Count)
-
                 local message = string.format(getText("IGUI_WonItem"), itemName, value.Count)
+
                 if Awards.Options.showMessageInChat then
                     attacker:Say(message)
                 else
@@ -93,12 +98,19 @@ local function ZombKilled(zombie)
                 if AddAwardMessageToUI then
                     AddAwardMessageToUI(awardMessage)
                 end
+
             else
+
                 if Awards.Options.showMessageInChat then
                     attacker:Say(string.format(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)))
                 else
-                    attacker:setHaloNote(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills))
+                    attacker:setHaloNote(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills), 255, 0, 0, 300)
                 end
+
+                if AddLoserMessageToUI then
+                    AddLoserMessageToUI(string.format(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)))
+                end
+
             end
 
             won = true
@@ -106,13 +118,24 @@ local function ZombKilled(zombie)
         end
     end
 
-    if not won and Awards.Options.showNumberWhenLosing then
+    if (not won) then
+
         local message = string.format(getText("IGUI_LoseItem"), number)
-        if Awards.Options.showMessageInChat then
-            attacker:Say(message)
-        else
-            attacker:setHaloNote(message, 255, 0, 0, 300)
+
+        if (Awards.Options.showNumberWhenLosing) then
+
+            if Awards.Options.showMessageInChat then
+                attacker:Say(message)
+            else
+                attacker:setHaloNote(message, 255, 0, 0, 300)
+            end
+
         end
+
+        if AddLoserMessageToUI then
+            AddLoserMessageToUI(message)
+        end
+
     end
 end
 

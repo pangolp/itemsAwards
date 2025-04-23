@@ -7,6 +7,7 @@ UI_EN = {
     UI_close = "Close",
     UI_pressF10 = "Press F10 to open/close this window",
     UI_awards_button_tooltip = "Open/Close Awards Window",
-    UI_clean = "Clean",
+    UI_clean = "Clean: wins",
     UI_awardMessage = "Item: %s - Count: %d",
+    UI_clean_loser = "Clear: lost",
 }
