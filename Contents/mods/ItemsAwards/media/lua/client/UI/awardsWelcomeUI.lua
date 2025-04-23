@@ -83,8 +83,7 @@ function AwardsWelcomeUI:onCloseClick()
 end
 
 function AwardsWelcomeUI:onCleanClick()
-    self:setVisible(false)
-    self:removeFromUIManager()
+    self.awardsList:clear()
 end
 
 function AwardsWelcomeUI:addAwardMessage(message)
