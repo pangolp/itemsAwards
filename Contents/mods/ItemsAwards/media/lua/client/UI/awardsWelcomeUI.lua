@@ -110,7 +110,7 @@ function CreateWelcomeWindow()
     local screenH = getCore():getScreenHeight()
     local width = 400
     local height = 300
-    local x = (screenW - width) / 2
+    local x = (screenW - width) / 2 + 400
     local y = (screenH - height) / 2
 
     awardsWelcomeWindow = AwardsWelcomeUI:new(x, y, width, height)
@@ -150,7 +150,7 @@ end
 local function createHUDButton()
     if AwardsHUDButton.instance then return end
     local btnSize = 32
-    local x = getCore():getScreenWidth() - btnSize - 20
+    local x = getCore():getScreenWidth() - btnSize - 80
     local y = 100
 
     local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
