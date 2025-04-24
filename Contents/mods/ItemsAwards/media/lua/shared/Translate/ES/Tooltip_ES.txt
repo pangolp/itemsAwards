@@ -1,4 +1,6 @@
 Tooltip_ES = {
     Tooltip_Awards_showNumberWhenLosing = "Habilita o deshabilita, la posibilidad de ver el dado perdedor. Por defecto, desactivado.",
-    Tooltip_Awards_showMessageInChat = "Habilita o deshabilita el mensaje en el chat. Por defecto, desactivado."
+    Tooltip_Awards_showMessageInChat = "Habilita o deshabilita el mensaje en el chat. Por defecto, desactivado.",
+    Tooltip_Awards_limitWinningNumbers = "Limite de premios ganadores a mostrar en el registro",
+    Tooltip_Awards_limitLosingNumbers = "Limite de numeros perdedores a mostrar en el registro"
 }

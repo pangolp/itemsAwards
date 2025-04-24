@@ -1,4 +1,6 @@
 Tooltip_EN = {
     Tooltip_Awards_showNumberWhenLosing = "Enables or disables the ability to see the losing die. By default, disabled.",
-    Tooltip_Awards_showMessageInChat = "Enables or disables chat messaging. By default, disabled."
+    Tooltip_Awards_showMessageInChat = "Enables or disables chat messaging. By default, disabled.",
+    Tooltip_Awards_limitWinningNumbers = "Limit of winning prizes to be displayed in the registry",
+    Tooltip_Awards_limitLosingNumbers = "Limit of losing numbers to display in the record"
 }
