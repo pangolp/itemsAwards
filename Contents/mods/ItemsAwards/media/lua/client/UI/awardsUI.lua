@@ -94,14 +94,13 @@ function AwardsWelcomeUI:drawAwardItem(y, item, alt)
     end
 
     local nameX = x + iconSize + 8
-    if item.item and item.item.name then
-        self:drawText(item.item.name, nameX, y + 3, 1, 1, 1, a, self.font)
-    end
 
-    if item.item and item.item.count and tostring(item.item.count) ~= "" then
-        local countText = "x" .. tostring(item.item.count)
-        local countX = self:getWidth() - 40 - getTextManager():MeasureStringX(self.font, countText)
-        self:drawText(countText, countX, y + 6, 1, 1, 1, a, self.font)
+    if item.item and item.item.name then
+        if item.item.count and tostring(item.item.count) ~= "" then
+            self:drawText(string.format("%s x %d", item.item.name, item.item.count), nameX, y + 3, 1, 1, 1, a, self.font)
+        else
+            self:drawText(item.item.name, nameX, y + 3, 1, 1, 1, a, self.font)
+        end
     end
 
     return y + self.itemheight
