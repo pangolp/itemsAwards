@@ -223,8 +223,8 @@ end
 local function createHUDButton()
     if AwardsHUDButton.instance then return end
     local btnSize = 32
-    local x = getCore():getScreenWidth() - btnSize - 80
-    local y = 100
+    local x = getCore():getScreenWidth() - 50
+    local y = 600
 
     local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
     btn:setAnchorLeft(false)
