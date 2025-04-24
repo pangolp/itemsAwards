@@ -109,12 +109,10 @@ end
 
 function AwardsWelcomeUI:drawLoserItem(y, item, alt)
     local a = 0.9
-    self:drawRectBorder(0, y, self:getWidth(), self.itemheight - 1, a, 0.5, 0, 0)
+    self:drawRectBorder(0, y, self:getWidth(), self.itemheight - 1, a, self.borderColor.r, self.borderColor.g, self.borderColor.b)
     self:drawText(item.text, 10, y + 2, 1, 1, 1, a, self.font)
     return y + self.itemheight
 end
-
-function AwardsWelcomeUI:onAwardClick(item) end
 
 function AwardsWelcomeUI:onCloseClick()
     self:setVisible(false)
