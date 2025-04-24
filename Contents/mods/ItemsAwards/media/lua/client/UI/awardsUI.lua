@@ -25,12 +25,11 @@ function AwardsWelcomeUI:create()
     self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 100)
     self.awardsList:initialise()
     self.awardsList:instantiate()
-    self.awardsList.itemheight = 20
+    self.awardsList.itemheight = 32
     self.awardsList.selected = 0
     self.awardsList.joypadParent = self
     self.awardsList.font = UIFont.NewSmall
     self.awardsList.doDrawItem = self.drawAwardItem
-    self.awardsList:setOnMouseDownFunction(self, self.onAwardClick)
     self:addChild(self.awardsList)
 
     self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 100)
@@ -87,7 +86,23 @@ function AwardsWelcomeUI:drawAwardItem(y, item, alt)
         self:drawRect(0, y, self:getWidth(), self.itemheight - 1, 0.3, 0.7, 0.35, 0.15)
     end
 
-    self:drawText(item.text, 10, y + 2, 1, 1, 1, a, self.font)
+    local iconSize = (self.itemheight - 4) / 2
+    local x = 5
+
+    if item.item and item.item.icon then
+        self:drawTextureScaledAspect(item.item.icon, x, y + (self.itemheight - iconSize) / 2, iconSize, iconSize, a, 1, 1, 1)
+    end
+
+    local nameX = x + iconSize + 8
+    if item.item and item.item.name then
+        self:drawText(item.item.name, nameX, y + 6, 1, 1, 1, a, self.font)
+    end
+
+    if item.item and item.item.count and tostring(item.item.count) ~= "" then
+        local countText = "x" .. tostring(item.item.count)
+        local countX = self:getWidth() - 40 - getTextManager():MeasureStringX(self.font, countText)
+        self:drawText(countText, countX, y + 6, 1, 1, 1, a, self.font)
+    end
 
     return y + self.itemheight
 end
@@ -114,17 +129,27 @@ function AwardsWelcomeUI:onCleanLoserClick()
     self.losersList:clear()
 end
 
-function AwardsWelcomeUI:addAwardMessage(message)
-
+function AwardsWelcomeUI:addAwardMessage(_item, _message)
     local limit = Awards.Options.limitWinningNumbers * 5
+    local icon, name, count = nil, _message, ""
 
-    self.awardsList:insertItem(1, message, {})
+    if _item then
+        local item = InventoryItemFactory.CreateItem(_item)
+        if item then
+            icon = item:getTex()
+            name = item:getDisplayName()
+        end
+    end
+
+    local qty = string.match(_message, "x(%d+)")
+    if qty then count = qty end
+
+    self.awardsList:insertItem(1, name, {icon = icon, name = name, count = count})
     self.awardsList.selected = 1
 
     while self.awardsList:size() > limit do
         self.awardsList:removeItemByIndex(self.awardsList:size())
     end
-
 end
 
 function AwardsWelcomeUI:addLoserMessage(message)
@@ -228,9 +253,9 @@ end
 
 Events.OnGameStart.Add(OnGameStart)
 
-function AddAwardMessageToUI(message)
+function AddAwardMessageToUI(_item, _message)
     if awardsWelcomeWindow then
-        awardsWelcomeWindow:addAwardMessage(message)
+        awardsWelcomeWindow:addAwardMessage(_item, _message)
     end
 end
 
