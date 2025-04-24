@@ -139,7 +139,7 @@ function AwardsWelcomeUI:addAwardMessage(_item, _message)
         end
     end
 
-    local qty = string.match(_message, "x(%d+)")
+    local qty = string.match(_message, " x(%d+)")
     if qty then count = qty end
 
     self.awardsList:insertItem(1, name, {icon = icon, name = name, count = count})
