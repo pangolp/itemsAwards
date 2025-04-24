@@ -22,20 +22,20 @@ function AwardsWelcomeUI:create()
     local btnWidth = 100
     local btnHeight = 25
 
-    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 100)
+    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 110)
     self.awardsList:initialise()
     self.awardsList:instantiate()
-    self.awardsList.itemheight = 32
+    self.awardsList.itemheight = 22
     self.awardsList.selected = 0
     self.awardsList.joypadParent = self
     self.awardsList.font = UIFont.NewSmall
     self.awardsList.doDrawItem = self.drawAwardItem
     self:addChild(self.awardsList)
 
-    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 100)
+    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 110)
     self.losersList:initialise()
     self.losersList:instantiate()
-    self.losersList.itemheight = 20
+    self.losersList.itemheight = 22
     self.awardsList.selected = 0
     self.losersList.font = UIFont.NewSmall
     self.losersList.doDrawItem = self.drawLoserItem
@@ -86,7 +86,7 @@ function AwardsWelcomeUI:drawAwardItem(y, item, alt)
         self:drawRect(0, y, self:getWidth(), self.itemheight - 1, 0.3, 0.7, 0.35, 0.15)
     end
 
-    local iconSize = (self.itemheight - 4) / 2
+    local iconSize = (self.itemheight - 4)
     local x = 5
 
     if item.item and item.item.icon then
@@ -95,7 +95,7 @@ function AwardsWelcomeUI:drawAwardItem(y, item, alt)
 
     local nameX = x + iconSize + 8
     if item.item and item.item.name then
-        self:drawText(item.item.name, nameX, y + 6, 1, 1, 1, a, self.font)
+        self:drawText(item.item.name, nameX, y + 3, 1, 1, 1, a, self.font)
     end
 
     if item.item and item.item.count and tostring(item.item.count) ~= "" then
