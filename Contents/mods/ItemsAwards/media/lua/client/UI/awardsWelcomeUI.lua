@@ -141,7 +141,7 @@ function CreateWelcomeWindow()
     local screenW = getCore():getScreenWidth()
     local screenH = getCore():getScreenHeight()
     local width = 500
-    local height = 350
+    local height = 380
     local x = (screenW - width) / 2 + 400
     local y = (screenH - height) / 2
 
