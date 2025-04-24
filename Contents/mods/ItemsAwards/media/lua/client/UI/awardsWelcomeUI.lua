@@ -115,21 +115,29 @@ function AwardsWelcomeUI:onCleanLoserClick()
 end
 
 function AwardsWelcomeUI:addAwardMessage(message)
-    if self.awardsList:size() >= 5 then
-        self.awardsList:removeItemByIndex(5)
-    end
+
+    local limit = Awards.Options.limitWinningNumbers * 5
 
     self.awardsList:insertItem(1, message, {})
     self.awardsList.selected = 1
+
+    while self.awardsList:size() > limit do
+        self.awardsList:removeItemByIndex(self.awardsList:size())
+    end
+
 end
 
 function AwardsWelcomeUI:addLoserMessage(message)
-    if self.losersList:size() >= 5 then
-        self.losersList:removeItemByIndex(5)
-    end
+
+    local limit = Awards.Options.limitLosingNumbers * 5
 
     self.losersList:insertItem(1, message, {})
     self.losersList.selected = 1
+
+    while self.losersList:size() > limit do
+        self.losersList:removeItemByIndex(self.losersList:size())
+    end
+
 end
 
 function AwardsWelcomeUI:new(x, y, width, height)

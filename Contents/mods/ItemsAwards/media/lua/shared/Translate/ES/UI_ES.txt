@@ -10,4 +10,6 @@ UI_ES = {
     UI_clean = "Limpiar ganados",
     UI_awardMessage = "Item: %s - Cantidad: %d",
     UI_clean_loser = "Limpiar perdidos",
+    UI_Awards_limitWinningNumbers = "Cantidad de numeros ganadores",
+    UI_Awards_limitLosingNumbers = "Cantidad de numeros perdedores"
 }
