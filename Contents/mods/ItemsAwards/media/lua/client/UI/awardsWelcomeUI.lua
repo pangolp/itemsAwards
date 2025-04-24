@@ -22,10 +22,10 @@ function AwardsWelcomeUI:create()
     local btnWidth = 100
     local btnHeight = 25
 
-    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, self.height - 250)
+    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 100)
     self.awardsList:initialise()
     self.awardsList:instantiate()
-    self.awardsList.itemheight = 22
+    self.awardsList.itemheight = 20
     self.awardsList.selected = 0
     self.awardsList.joypadParent = self
     self.awardsList.font = UIFont.NewSmall
@@ -33,10 +33,11 @@ function AwardsWelcomeUI:create()
     self.awardsList:setOnMouseDownFunction(self, self.onAwardClick)
     self:addChild(self.awardsList)
 
-    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 80)
+    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 100)
     self.losersList:initialise()
     self.losersList:instantiate()
     self.losersList.itemheight = 20
+    self.awardsList.selected = 0
     self.losersList.font = UIFont.NewSmall
     self.losersList.doDrawItem = self.drawLoserItem
     self:addChild(self.losersList)
@@ -54,7 +55,7 @@ function AwardsWelcomeUI:create()
     self:addChild(self.closeButton)
 
     self.cleanButton = ISButton:new(
-        self.closeButton:getX() + btnWidth + btnHeight,
+        self.closeButton:getX() + btnWidth + 10,
         self.losersList:getY() + self.losersList:getHeight() + 10,
         btnWidth,
         btnHeight,
@@ -66,7 +67,7 @@ function AwardsWelcomeUI:create()
     self:addChild(self.cleanButton)
 
     self.cleanLoserButton = ISButton:new(
-        self.cleanButton:getX() + btnWidth + btnHeight,
+        self.cleanButton:getX() + btnWidth + 10,
         self.losersList:getY() + self.losersList:getHeight() + 10,
         btnWidth,
         btnHeight,
@@ -114,13 +115,29 @@ function AwardsWelcomeUI:onCleanLoserClick()
 end
 
 function AwardsWelcomeUI:addAwardMessage(message)
-    self.awardsList:addItem(message, {})
-    self.awardsList.selected = self.awardsList:size()
+
+    local limit = Awards.Options.limitWinningNumbers * 5
+
+    self.awardsList:insertItem(1, message, {})
+    self.awardsList.selected = 1
+
+    while self.awardsList:size() > limit do
+        self.awardsList:removeItemByIndex(self.awardsList:size())
+    end
+
 end
 
 function AwardsWelcomeUI:addLoserMessage(message)
-    self.losersList:addItem(message, {})
-    self.losersList.selected = self.losersList:size()
+
+    local limit = Awards.Options.limitLosingNumbers * 5
+
+    self.losersList:insertItem(1, message, {})
+    self.losersList.selected = 1
+
+    while self.losersList:size() > limit do
+        self.losersList:removeItemByIndex(self.losersList:size())
+    end
+
 end
 
 function AwardsWelcomeUI:new(x, y, width, height)
@@ -141,7 +158,7 @@ function CreateWelcomeWindow()
     local screenW = getCore():getScreenWidth()
     local screenH = getCore():getScreenHeight()
     local width = 500
-    local height = 350
+    local height = 380
     local x = (screenW - width) / 2 + 400
     local y = (screenH - height) / 2
 
