@@ -37,6 +37,7 @@ function AwardsWelcomeUI:create()
     self.losersList:initialise()
     self.losersList:instantiate()
     self.losersList.itemheight = 20
+    self.awardsList.selected = 0
     self.losersList.font = UIFont.NewSmall
     self.losersList.doDrawItem = self.drawLoserItem
     self:addChild(self.losersList)
@@ -114,13 +115,21 @@ function AwardsWelcomeUI:onCleanLoserClick()
 end
 
 function AwardsWelcomeUI:addAwardMessage(message)
-    self.awardsList:addItem(message, {})
-    self.awardsList.selected = self.awardsList:size()
+    if self.awardsList:size() >= 5 then
+        self.awardsList:removeItemByIndex(5)
+    end
+
+    self.awardsList:insertItem(1, message, {})
+    self.awardsList.selected = 1
 end
 
 function AwardsWelcomeUI:addLoserMessage(message)
-    self.losersList:addItem(message, {})
-    self.losersList.selected = self.losersList:size()
+    if self.losersList:size() >= 5 then
+        self.losersList:removeItemByIndex(5)
+    end
+
+    self.losersList:insertItem(1, message, {})
+    self.losersList.selected = 1
 end
 
 function AwardsWelcomeUI:new(x, y, width, height)
