@@ -89,7 +89,7 @@ local function ZombKilled(zombie)
                     attacker:setHaloNote(message)
                 end
 
-                local awardMessage = itemName .. " x" .. value.Count
+                local awardMessage = string.format(getText("UI_awardMessage"), itemName, value.Count)
 
                 if AddAwardsLogMessage then
                     AddAwardsLogMessage(awardMessage)

@@ -96,11 +96,7 @@ function AwardsWelcomeUI:drawAwardItem(y, item, alt)
     local nameX = x + iconSize + 8
 
     if item.item and item.item.name then
-        if item.item.count and tostring(item.item.count) ~= "" then
-            self:drawText(string.format("%s x %d", item.item.name, item.item.count), nameX, y + 3, 1, 1, 1, a, self.font)
-        else
-            self:drawText(item.item.name, nameX, y + 3, 1, 1, 1, a, self.font)
-        end
+        self:drawText(item.item.name, nameX, y + 3, 1, 1, 1, a, self.font)
     end
 
     return y + self.itemheight
@@ -128,20 +124,16 @@ end
 
 function AwardsWelcomeUI:addAwardMessage(_item, _message)
     local limit = Awards.Options.limitWinningNumbers * 5
-    local icon, name, count = nil, _message, ""
+    local icon, name = nil, _message
 
     if _item then
         local item = InventoryItemFactory.CreateItem(_item)
         if item then
             icon = item:getTex()
-            name = item:getDisplayName()
         end
     end
 
-    local qty = string.match(_message, " x(%d+)")
-    if qty then count = qty end
-
-    self.awardsList:insertItem(1, name, {icon = icon, name = name, count = count})
+    self.awardsList:insertItem(1, name, {icon = icon, name = name})
     self.awardsList.selected = 1
 
     while self.awardsList:size() > limit do
