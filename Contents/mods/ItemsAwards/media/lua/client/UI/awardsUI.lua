@@ -22,21 +22,20 @@ function AwardsWelcomeUI:create()
     local btnWidth = 100
     local btnHeight = 25
 
-    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 100)
+    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 110)
     self.awardsList:initialise()
     self.awardsList:instantiate()
-    self.awardsList.itemheight = 20
+    self.awardsList.itemheight = 22
     self.awardsList.selected = 0
     self.awardsList.joypadParent = self
     self.awardsList.font = UIFont.NewSmall
     self.awardsList.doDrawItem = self.drawAwardItem
-    self.awardsList:setOnMouseDownFunction(self, self.onAwardClick)
     self:addChild(self.awardsList)
 
-    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 100)
+    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 110)
     self.losersList:initialise()
     self.losersList:instantiate()
-    self.losersList.itemheight = 20
+    self.losersList.itemheight = 22
     self.awardsList.selected = 0
     self.losersList.font = UIFont.NewSmall
     self.losersList.doDrawItem = self.drawLoserItem
@@ -87,19 +86,28 @@ function AwardsWelcomeUI:drawAwardItem(y, item, alt)
         self:drawRect(0, y, self:getWidth(), self.itemheight - 1, 0.3, 0.7, 0.35, 0.15)
     end
 
-    self:drawText(item.text, 10, y + 2, 1, 1, 1, a, self.font)
+    local iconSize = (self.itemheight - 4)
+    local x = 5
+
+    if item.item and item.item.icon then
+        self:drawTextureScaledAspect(item.item.icon, x, y + (self.itemheight - iconSize) / 2, iconSize, iconSize, a, 1, 1, 1)
+    end
+
+    local nameX = x + iconSize + 8
+
+    if item.item and item.item.name then
+        self:drawText(item.item.name, nameX, y + 3, 1, 1, 1, a, self.font)
+    end
 
     return y + self.itemheight
 end
 
 function AwardsWelcomeUI:drawLoserItem(y, item, alt)
     local a = 0.9
-    self:drawRectBorder(0, y, self:getWidth(), self.itemheight - 1, a, 0.5, 0, 0)
+    self:drawRectBorder(0, y, self:getWidth(), self.itemheight - 1, a, self.borderColor.r, self.borderColor.g, self.borderColor.b)
     self:drawText(item.text, 10, y + 2, 1, 1, 1, a, self.font)
     return y + self.itemheight
 end
-
-function AwardsWelcomeUI:onAwardClick(item) end
 
 function AwardsWelcomeUI:onCloseClick()
     self:setVisible(false)
@@ -114,17 +122,23 @@ function AwardsWelcomeUI:onCleanLoserClick()
     self.losersList:clear()
 end
 
-function AwardsWelcomeUI:addAwardMessage(message)
-
+function AwardsWelcomeUI:addAwardMessage(_item, _message)
     local limit = Awards.Options.limitWinningNumbers * 5
+    local icon, name = nil, _message
 
-    self.awardsList:insertItem(1, message, {})
+    if _item then
+        local item = InventoryItemFactory.CreateItem(_item)
+        if item then
+            icon = item:getTex()
+        end
+    end
+
+    self.awardsList:insertItem(1, name, {icon = icon, name = name})
     self.awardsList.selected = 1
 
     while self.awardsList:size() > limit do
         self.awardsList:removeItemByIndex(self.awardsList:size())
     end
-
 end
 
 function AwardsWelcomeUI:addLoserMessage(message)
@@ -200,8 +214,8 @@ end
 local function createHUDButton()
     if AwardsHUDButton.instance then return end
     local btnSize = 32
-    local x = getCore():getScreenWidth() - btnSize - 80
-    local y = 100
+    local x = getCore():getScreenWidth() - 50
+    local y = 600
 
     local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
     btn:setAnchorLeft(false)
@@ -228,9 +242,9 @@ end
 
 Events.OnGameStart.Add(OnGameStart)
 
-function AddAwardMessageToUI(message)
+function AddAwardMessageToUI(_item, _message)
     if awardsWelcomeWindow then
-        awardsWelcomeWindow:addAwardMessage(message)
+        awardsWelcomeWindow:addAwardMessage(_item, _message)
     end
 end
 

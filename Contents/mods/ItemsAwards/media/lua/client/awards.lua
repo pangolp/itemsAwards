@@ -96,7 +96,7 @@ local function ZombKilled(zombie)
                 end
 
                 if AddAwardMessageToUI then
-                    AddAwardMessageToUI(awardMessage)
+                    AddAwardMessageToUI(value.Item, awardMessage)
                 end
 
             else
