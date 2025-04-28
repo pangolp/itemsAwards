@@ -248,8 +248,6 @@ local function OnGameStart()
     createHUDButton()
 end
 
-Events.OnGameStart.Add(OnGameStart)
-
 function AddAwardMessageToUI(_item, _message)
     if awardsWelcomeWindow then
         awardsWelcomeWindow:addAwardMessage(_item, _message)
@@ -261,3 +259,5 @@ function AddLoserMessageToUI(message)
         awardsWelcomeWindow:addLoserMessage(message)
     end
 end
+
+Events.OnGameStart.Add(OnGameStart)
