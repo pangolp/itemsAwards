@@ -30,6 +30,7 @@ function AwardsWelcomeUI:create()
     self.awardsList.joypadParent = self
     self.awardsList.font = UIFont.NewSmall
     self.awardsList.doDrawItem = self.drawAwardItem
+    self.awardsList:setOnMouseDownFunction(self, self.onAwardClick)
     self:addChild(self.awardsList)
 
     self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 110)
@@ -138,6 +139,13 @@ function AwardsWelcomeUI:addAwardMessage(_item, _message)
 
     while self.awardsList:size() > limit do
         self.awardsList:removeItemByIndex(self.awardsList:size())
+    end
+end
+
+function AwardsWelcomeUI:onAwardClick()
+    local selectedIndex = self.awardsList.selected
+    if selectedIndex and selectedIndex > 0 then
+        self.awardsList:removeItemByIndex(selectedIndex)
     end
 end
 
