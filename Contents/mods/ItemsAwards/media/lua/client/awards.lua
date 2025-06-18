@@ -34,7 +34,7 @@ local itemsAwards = {
     {Item = "Base.Bag_SurvivorBag", Number = 150, Count = 1, zkills = 3000}, -- Large Backpack
     {Item = "Base.Bag_ALICEpack", Number = 155, Count = 1, zkills = 3000}, -- Large Backpack
     {Item = "Base.MugSpiffo", Number = 160, Count = 1, zkills = 500}, -- Empty Spiffo Mug
-    {Item = "Base.CarBatteryCharger", Number = 165, Count = 1, zkills = 1000}, -- Car Battery Charger
+    {Item = "Base.CarBatteryCharger", Number = 165, Count = 1, zkills = 10000}, -- Car Battery Charger
     {Item = "Base.WoodAxe", Number = 170, Count = 1, zkills = 3000}, -- Wood Axe
     {Item = "Base.BoxOfJars", Number = 175, Count = 1, zkills = 1000}, -- Box of Jars
     {Item = "Base.CombinationPadlock", Number = 180, Count = 1, zkills = 500}, -- Combination Padlock
@@ -59,6 +59,23 @@ local itemsAwards = {
     {Item = "Base.SpiffoBig", Number = 275, Count = 1, zkills = 3000}, -- Big Spiffo
     {Item = "Base.Spiffo", Number = 280, Count = 1, zkills = 3000}, -- Spiffo
     {Item = "Base.VHS_Home", Number = 290, Count = 1, zkills = 5000}, -- VHS Home
+    {Item = "Base.Salt", Number = 300, Count = 1, zkills = 5000}, -- Salt
+    {Item = "Base.TomatoPaste", Number = 305, Count = 1, zkills = 5000}, -- Tomato Paste
+    {Item = "Base.OilOlive", Number = 310, Count = 1, zkills = 5000}, -- Oil Olive
+    {Item = "Base.Cheese", Number = 315, Count = 1, zkills = 5000}, -- Cheese
+    {Item = "Base.Book", Number = 320, Count = 1, zkills = 10000}, -- Book
+    {Item = "Base.PaintBlack", Number = 325, Count = 1, zkills = 10000}, -- Paint Black
+    {Item = "Base.PaintBlue", Number = 330, Count = 1, zkills = 10000}, -- Paint Blue
+    {Item = "Base.PaintBrown", Number = 335, Count = 1, zkills = 10000}, -- Paint Brown
+    {Item = "Base.PaintCyan", Number = 340, Count = 1, zkills = 10000}, -- Paint Cyan
+    {Item = "Base.PaintGreen", Number = 345, Count = 1, zkills = 10000}, -- Paint Green
+    {Item = "Base.PaintGrey", Number = 350, Count = 1, zkills = 10000}, -- Paint Grey
+    {Item = "Base.PaintOrange", Number = 355, Count = 1, zkills = 10000}, -- Paint Orange
+    {Item = "Base.PaintPink", Number = 360, Count = 1, zkills = 10000}, -- Paint Pink
+    {Item = "Base.PaintPurple", Number = 365, Count = 1, zkills = 10000}, -- Paint Purple
+    {Item = "Base.PaintRed", Number = 370, Count = 1, zkills = 10000}, -- Paint Red
+    {Item = "Base.PaintWhite", Number = 375, Count = 1, zkills = 10000}, -- Paint White
+    {Item = "Base.PaintYellow", Number = 380, Count = 1, zkills = 10000}, -- Paint Yellow
 }
 
 local function ZombKilled(zombie)
@@ -69,7 +86,7 @@ local function ZombKilled(zombie)
         return
     end
 
-    local number = ZombRandBetween(1, 501)
+    local number = ZombRandBetween(1, 701)
     local countZombieKill = attacker:getZombieKills() + 1
     local won = false
 
