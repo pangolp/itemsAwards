@@ -1,9 +1,9 @@
 UI_AR = {
     UI_Awards_showNumberWhenLosing = "Mostrar dado al perder",
     UI_Awards_showMessageInChat = "Mostrar mensaje en el chat"
-    UI_welcomeawards = "¡Bienvenido a Items Awards!",
-    UI_version = "Versión",
-    UI_instructions = "Aquí esta el registro de lo ganado.  El mismo se borra si te desconectas.",
+    UI_welcomeawards = "Â¡Bienvenido a Items Awards!",
+    UI_version = "VersiÃ³n",
+    UI_instructions = "AquÃ­ esta el registro de lo ganado.  El mismo se borra si te desconectas.",
     UI_close = "Cerrar",
     UI_awards_button_tooltip = "Abrir/Cerrar Ventana de Premios",
     UI_clean = "Limpiar ganados",
