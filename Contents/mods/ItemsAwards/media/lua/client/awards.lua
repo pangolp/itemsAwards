@@ -2,7 +2,7 @@ Awards = Awards or {}
 Awards.Options = Awards.Options or {}
 
 local itemsAwards = {
-    {Item = "Base.CopperCoin", Number = 50, Count = 1, zkills = 1}, -- Copper Coin
+    {Item = "Base.CopperCoin", Number = 50, Count = 1, zkills = 1, onZombie = false}, -- Copper Coin
 }
 
 local function ZombKilled(zombie)
@@ -24,7 +24,13 @@ local function ZombKilled(zombie)
             if (countZombieKill >= value.zkills) then
 
                 local itemName = getItemNameFromFullType(value.Item)
-                zombie:getInventory():AddItems(value.Item, value.Count)
+
+                if value.onZombie then
+                    zombie:getInventory():AddItems(value.Item, value.Count)
+                else
+                    attacker:getInventory():AddItems(value.Item, value.Count)
+                end
+
                 local message = string.format(getText("IGUI_WonItem"), itemName, value.Count)
 
                 if Awards.Options.showMessageInChat then
