@@ -1,6 +1,6 @@
 UI_ES = {
     UI_Awards_showNumberWhenLosing = "Mostrar dado al perder",
-    UI_Awards_showMessageInChat = "Mostrar mensaje en el chat"
+    UI_Awards_showMessageInChat = "Mostrar mensaje en el chat",
     UI_welcomeawards = "¡Bienvenido a Items Awards!",
     UI_version = "Versión",
     UI_instructions = "Aquí esta el registro de lo ganado.  El mismo se borra si te desconectas.",
