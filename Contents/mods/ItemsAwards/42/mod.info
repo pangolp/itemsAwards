@@ -2,4 +2,6 @@ name=Items Awards
 poster=itemsAwards.png
 id=ItemsAwards
 description=Rewards the player with items when eliminating a zombie
-require=modoptions,mod-translate
+author=pangolp
+modversion=42-1.0.1
+versionMin=42.0.0
