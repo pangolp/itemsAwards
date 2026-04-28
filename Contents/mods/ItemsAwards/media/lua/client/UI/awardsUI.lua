@@ -268,6 +268,13 @@ function AddLoserMessageToUI(_message)
 end
 
 local function OnGameStart()
+    if not Awards.dataFileLoaded then
+        local player = getSpecificPlayer(0)
+        if player then
+            player:Say(getText("IGUI_Awards_MissingDataFile"))
+        end
+    end
+
     local onTick
     onTick = function()
         if not AwardsWelcomeUI.instance then

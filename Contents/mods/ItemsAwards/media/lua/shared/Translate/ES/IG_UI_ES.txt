@@ -2,4 +2,5 @@ IGUI_ES = {
     IGUI_WonItem = "[Items Awards]: Has ganado: %s. Cantidad: %d",
     IGUI_LoseItem = "[Items Awards]: Tu número fue: %d. ¡Sigue intentando!",
     IGUI_YouNeedMoreKills = "[Items Awards]: Ganaste con %d, pero el premio requiere mas kills: %d",
+    IGUI_Awards_MissingDataFile = "[ItemsAwards] Fichero de configuración no encontrado. Por favor, pedile al administrador del servidor que cree itemsAwardsData.lua a partir del ejemplo incluido.",
 }
