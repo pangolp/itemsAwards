@@ -21,40 +21,66 @@ Regarding the viewer, the history is currently maintained while the user is on t
 When the user leaves, disconnects, or loses connection, the history is reset.
 
 ```
-itemsAwards/
+ItemsAwards/
 |-- Contents
 |   `-- mods
 |       `-- ItemsAwards
-|           |-- media
-|           |   |-- lua
-|           |   |   |-- client
-|           |   |   |   |-- UI
-|           |   |   |   |   `-- awardsUI.lua
-|           |   |   |   |-- awards.lua
-|           |   |   |   `-- awardsOptions.lua
-|           |   |   `-- shared
-|           |   |       `-- Translate
-|           |   |           |-- AR
-|           |   |           |   |-- IG_UI_AR.txt
-|           |   |           |   |-- Tooltip_AR.txt
-|           |   |           |   `-- UI_AR.txt
-|           |   |           |-- EN
-|           |   |           |   |-- IG_UI_EN.txt
-|           |   |           |   |-- Tooltip_EN.txt
-|           |   |           |   `-- UI_EN.txt
-|           |   |           `-- ES
-|           |   |               |-- IG_UI_ES.txt
-|           |   |               |-- Tooltip_ES.txt
-|           |   |               `-- UI_ES.txt
-|           |   `-- ui
-|           |       `-- icons
-|           |           `-- gift_regular_icon.png
-|           `-- mod.info
+|           |-- 42
+|           |   |-- itemsAwards.png
+|           |   |-- media
+|           |   |   `-- lua
+|           |   |       |-- client
+|           |   |       |   |-- ModOptions.lua
+|           |   |       |   |-- UI
+|           |   |       |   |   `-- awardsUI.lua
+|           |   |       |   `-- awards.lua
+|           |   |       `-- shared
+|           |   |           `-- Translate
+|           |   |               |-- AR
+|           |   |               |   |-- IG_UI.json
+|           |   |               |   |-- Tooltip.json
+|           |   |               |   `-- UI.json
+|           |   |               |-- EN
+|           |   |               |   |-- IG_UI.json
+|           |   |               |   |-- Tooltip.json
+|           |   |               |   `-- UI.json
+|           |   |               `-- ES
+|           |   |                   |-- IG_UI.json
+|           |   |                   |-- Tooltip.json
+|           |   |                   `-- UI.json
+|           |   `-- mod.info
+|           `-- common
+|               |-- itemsAwards.png
+|               |-- media
+|               |   |-- lua
+|               |   |   |-- client
+|               |   |   |   |-- UI
+|               |   |   |   |   `-- awardsUI.lua
+|               |   |   |   |-- awards.lua
+|               |   |   |   `-- awardsOptions.lua
+|               |   |   `-- shared
+|               |   |       `-- Translate
+|               |   |           |-- AR
+|               |   |           |   |-- IG_UI_AR.txt
+|               |   |           |   |-- Tooltip_AR.txt
+|               |   |           |   `-- UI_AR.txt
+|               |   |           |-- EN
+|               |   |           |   |-- IG_UI_EN.txt
+|               |   |           |   |-- Tooltip_EN.txt
+|               |   |           |   `-- UI_EN.txt
+|               |   |           `-- ES
+|               |   |               |-- IG_UI_ES.txt
+|               |   |               |-- Tooltip_ES.txt
+|               |   |               `-- UI_ES.txt
+|               |   `-- ui
+|               |       `-- icons
+|               |           `-- gift_regular_icon.png
+|               `-- mod.info
 |-- README.md
 |-- preview.png
 `-- workshop.txt
 
-14 directories, 17 files
+25 directories, 32 files
 ```
 
 #### External link
