@@ -1,0 +1,24 @@
+-- ============================================================
+--  Items Awards - Server Configuration File
+-- ============================================================
+--  INSTRUCTIONS:
+--  1. Copy this file and rename it to: itemsAwardsData.lua
+--  2. Edit the list below with the rewards you want.
+--  3. Do NOT rename or modify this .example file.
+--
+--  Each entry represents one possible reward:
+--
+--  Item     (string)  : Full item type. Example: "Base.Axe"
+--  Number   (number)  : The lucky number (1-100) that triggers this reward.
+--                       Each number can only appear once.
+--  Count    (number)  : How many items the player receives.
+--  zkills   (number)  : Minimum zombie kills required to be eligible.
+--  onZombie (boolean) : If true, the item is placed on the zombie's body.
+--                       If false, it goes directly into the player's inventory.
+-- ============================================================
+
+return {
+    { Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false },
+    { Item = "Base.CopperCoin", Number = 50, Count = 1, zkills = 1,  onZombie = false },
+    { Item = "Base.Axe",        Number = 75, Count = 1, zkills = 10, onZombie = true  },
+}

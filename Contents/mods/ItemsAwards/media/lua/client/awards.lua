@@ -1,9 +1,18 @@
 Awards = Awards or {}
 Awards.Options = Awards.Options or {}
 
-local itemsAwards = {
-    {Item = "Base.CopperCoin", Number = 50, Count = 1, zkills = 1, onZombie = false}, -- Copper Coin
+local itemsAwardsDefault = {
+    { Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false },
 }
+
+local ok, data = pcall(require, "itemsAwardsData")
+local itemsAwards = (ok and type(data) == "table") and data or itemsAwardsDefault
+
+Awards.dataFileLoaded = ok
+
+if not ok then
+    print("[ItemsAwards] itemsAwardsData.lua not found, using default awards table.")
+end
 
 local function awardsSendMessage(player, message, r, g, b, duration)
     if Awards.Options.showMessageInChat then
