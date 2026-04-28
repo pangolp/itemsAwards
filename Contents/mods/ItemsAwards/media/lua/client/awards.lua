@@ -52,13 +52,13 @@ local function ZombKilled(zombie)
             else
 
                 if Awards.Options.showMessageInChat then
-                    attacker:Say(string.format(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)))
+                    attacker:Say(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills))
                 else
                     attacker:setHaloNote(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills), 255, 0, 0, 300)
                 end
 
                 if AddLoserMessageToUI then
-                    AddLoserMessageToUI(string.format(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)))
+                    AddLoserMessageToUI(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills))
                 end
 
             end
