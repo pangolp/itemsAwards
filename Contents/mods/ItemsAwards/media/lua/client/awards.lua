@@ -5,6 +5,14 @@ local itemsAwards = {
     {Item = "Base.CopperCoin", Number = 50, Count = 1, zkills = 1, onZombie = false}, -- Copper Coin
 }
 
+local function awardsSendMessage(player, message, r, g, b, duration)
+    if Awards.Options.showMessageInChat then
+        player:Say(message)
+    else
+        player:setHaloNote(message, r, g, b, duration)
+    end
+end
+
 local function ZombKilled(zombie)
 
     local attacker = zombie:getAttackedBy()
@@ -33,11 +41,7 @@ local function ZombKilled(zombie)
 
                 local message = string.format(getText("IGUI_WonItem"), itemName, value.Count)
 
-                if Awards.Options.showMessageInChat then
-                    attacker:Say(message)
-                else
-                    attacker:setHaloNote(message)
-                end
+                awardsSendMessage(attacker, message, 255, 255, 255, 300)
 
                 local awardMessage = string.format(getText("UI_awardMessage"), itemName, value.Count)
 
@@ -51,11 +55,7 @@ local function ZombKilled(zombie)
 
             else
 
-                if Awards.Options.showMessageInChat then
-                    attacker:Say(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills))
-                else
-                    attacker:setHaloNote(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills), 255, 0, 0, 300)
-                end
+                awardsSendMessage(attacker, string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills), 255, 0, 0, 300)
 
                 if AddLoserMessageToUI then
                     AddLoserMessageToUI(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills))
@@ -74,11 +74,7 @@ local function ZombKilled(zombie)
 
         if (Awards.Options.showNumberWhenLosing) then
 
-            if Awards.Options.showMessageInChat then
-                attacker:Say(message)
-            else
-                attacker:setHaloNote(message, 255, 0, 0, 300)
-            end
+            awardsSendMessage(attacker, message, 255, 0, 0, 300)
 
         end
 
