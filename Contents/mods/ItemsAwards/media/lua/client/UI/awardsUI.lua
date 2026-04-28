@@ -18,64 +18,47 @@ function AwardsWelcomeUI:prerender()
     self:drawText(getText("UI_instructions"), 10, 70, 0.8, 0.8, 0.8, 1, UIFont.Small)
 end
 
+function AwardsWelcomeUI:createScrollList(x, y, drawItemFn)
+    local list = ISScrollingListBox:new(x, y, self.width - 20, 110)
+    list:initialise()
+    list:instantiate()
+    list.itemheight = 22
+    list.selected = 0
+    list.joypadParent = self
+    list.font = UIFont.NewSmall
+    list.doDrawItem = drawItemFn
+    self:addChild(list)
+    return list
+end
+
 function AwardsWelcomeUI:create()
     local btnWidth = 100
     local btnHeight = 25
 
-    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 110)
-    self.awardsList:initialise()
-    self.awardsList:instantiate()
-    self.awardsList.itemheight = 22
-    self.awardsList.selected = 0
-    self.awardsList.joypadParent = self
-    self.awardsList.font = UIFont.NewSmall
-    self.awardsList.doDrawItem = self.drawAwardItem
+    self.awardsList = self:createScrollList(10, 100, self.drawAwardItem)
     self.awardsList:setOnMouseDoubleClick(self, self.onAwardDoubleClick)
-    self:addChild(self.awardsList)
 
-    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 110)
-    self.losersList:initialise()
-    self.losersList:instantiate()
-    self.losersList.itemheight = 22
-    self.awardsList.selected = 0
-    self.losersList.font = UIFont.NewSmall
-    self.losersList.doDrawItem = self.drawLoserItem
-    self:addChild(self.losersList)
+    local losersY = self.awardsList:getY() + self.awardsList:getHeight() + 10
+    self.losersList = self:createScrollList(10, losersY, self.drawLoserItem)
+
+    local btnsY = self.losersList:getY() + self.losersList:getHeight() + 10
 
     self.closeButton = ISButton:new(
-        self.width - 490,
-        self.losersList:getY() + self.losersList:getHeight() + 10,
-        btnWidth,
-        btnHeight,
-        getText("UI_Close"),
-        self,
-        AwardsWelcomeUI.onCloseClick
+        self.width - 490, btnsY, btnWidth, btnHeight,
+        getText("UI_Close"), self, AwardsWelcomeUI.onCloseClick
     )
-
     self:addChild(self.closeButton)
 
     self.cleanButton = ISButton:new(
-        self.closeButton:getX() + btnWidth + 10,
-        self.losersList:getY() + self.losersList:getHeight() + 10,
-        btnWidth,
-        btnHeight,
-        getText("UI_clean"),
-        self,
-        AwardsWelcomeUI.onCleanClick
+        self.closeButton:getX() + btnWidth + 10, btnsY, btnWidth, btnHeight,
+        getText("UI_clean"), self, AwardsWelcomeUI.onCleanClick
     )
-
     self:addChild(self.cleanButton)
 
     self.cleanLoserButton = ISButton:new(
-        self.cleanButton:getX() + btnWidth + 10,
-        self.losersList:getY() + self.losersList:getHeight() + 10,
-        btnWidth,
-        btnHeight,
-        getText("UI_clean_loser"),
-        self,
-        AwardsWelcomeUI.onCleanLoserClick
+        self.cleanButton:getX() + btnWidth + 10, btnsY, btnWidth, btnHeight,
+        getText("UI_clean_loser"), self, AwardsWelcomeUI.onCleanLoserClick
     )
-
     self:addChild(self.cleanLoserButton)
 end
 
