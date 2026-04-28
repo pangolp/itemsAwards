@@ -1,89 +1,91 @@
 Awards = Awards or {}
 Awards.Options = Awards.Options or {}
 
-local itemsAwardsDefault = {
-    { Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false },
+local itemsAwards = {
+    {Item = "Base.CopperCoin", Number = 50, Count = 1, zkills = 1, onZombie = false}, -- Copper Coin
 }
 
-local ok, data = pcall(require, "itemsAwardsData")
-local itemsAwards = (ok and type(data) == "table") and data or itemsAwardsDefault
-
-Awards.dataFileLoaded = ok
-
-if not ok then
-    print("[ItemsAwards] itemsAwardsData.lua not found, using default awards table.")
-end
-
-local function awardsSendMessage(player, message, r, g, b, duration)
-    if Awards.Options.showMessageInChat then
-        player:Say(message)
-    else
-        player:setHaloNote(message, r, g, b, duration)
-    end
-end
-
-local function isValidAttacker(zombie)
-    local attacker = zombie:getAttackedBy()
-    if attacker == nil then return nil end
-    if not instanceof(attacker, "IsoPlayer") then return nil end
-    if attacker:getVehicle() ~= nil then return nil end
-    return attacker
-end
-
-local function tryGiveAward(attacker, zombie, number)
-    local countZombieKill = attacker:getZombieKills() + 1
-
-    for _, value in pairs(itemsAwards) do
-        if number ~= value.Number then
-            goto continue
-        end
-
-        local itemName = getItemNameFromFullType(value.Item)
-
-        if countZombieKill < value.zkills then
-            local message = string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)
-            awardsSendMessage(attacker, message, 255, 0, 0, 300)
-            if AddLoserMessageToUI then AddLoserMessageToUI(message) end
-            return true
-        end
-
-        if value.onZombie then
-            zombie:getInventory():AddItems(value.Item, value.Count)
-        else
-            attacker:getInventory():AddItems(value.Item, value.Count)
-        end
-
-        local message = string.format(getText("IGUI_WonItem"), itemName, value.Count)
-        awardsSendMessage(attacker, message, 255, 255, 255, 300)
-
-        local awardMessage = string.format(getText("UI_awardMessage"), itemName, value.Count)
-        if AddAwardsLogMessage then AddAwardsLogMessage(awardMessage) end
-        if AddAwardMessageToUI then AddAwardMessageToUI(value.Item, awardMessage) end
-
-        return true
-
-        ::continue::
-    end
-
-    return false
-end
-
-local function handleNoWin(attacker, number)
-    if not Awards.Options.showNumberWhenLosing then return end
-    local message = string.format(getText("IGUI_LoseItem"), number)
-    awardsSendMessage(attacker, message, 255, 0, 0, 300)
-    if AddLoserMessageToUI then AddLoserMessageToUI(message) end
-end
-
 local function ZombKilled(zombie)
-    local attacker = isValidAttacker(zombie)
-    if not attacker then return end
+
+    local attacker = zombie:getAttackedBy()
+
+    if attacker == nil or not instanceof(attacker, "IsoPlayer") or attacker:getVehicle() ~= nil then
+        return
+    end
 
     local number = ZombRandBetween(1, 101)
-    local won = tryGiveAward(attacker, zombie, number)
+    local countZombieKill = attacker:getZombieKills() + 1
+    local won = false
 
-    if not won then
-        handleNoWin(attacker, number)
+    for key, value in pairs(itemsAwards) do
+
+        if (number == value.Number) then
+
+            if (countZombieKill >= value.zkills) then
+
+                local itemName = getItemNameFromFullType(value.Item)
+
+                if value.onZombie then
+                    zombie:getInventory():AddItems(value.Item, value.Count)
+                else
+                    attacker:getInventory():AddItems(value.Item, value.Count)
+                end
+
+                local message = string.format(getText("IGUI_WonItem"), itemName, value.Count)
+
+                if Awards.Options.showMessageInChat then
+                    attacker:Say(message)
+                else
+                    attacker:setHaloNote(message)
+                end
+
+                local awardMessage = string.format(getText("UI_awardMessage"), itemName, value.Count)
+
+                if AddAwardsLogMessage then
+                    AddAwardsLogMessage(awardMessage)
+                end
+
+                if AddAwardMessageToUI then
+                    AddAwardMessageToUI(value.Item, awardMessage)
+                end
+
+            else
+
+                if Awards.Options.showMessageInChat then
+                    attacker:Say(string.format(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)))
+                else
+                    attacker:setHaloNote(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills), 255, 0, 0, 300)
+                end
+
+                if AddLoserMessageToUI then
+                    AddLoserMessageToUI(string.format(string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)))
+                end
+
+            end
+
+            won = true
+            break
+        end
+    end
+
+    if (not won) then
+
+        local message = string.format(getText("IGUI_LoseItem"), number)
+
+        if (Awards.Options.showNumberWhenLosing) then
+
+            if Awards.Options.showMessageInChat then
+                attacker:Say(message)
+            else
+                attacker:setHaloNote(message, 255, 0, 0, 300)
+            end
+
+        end
+
+        if AddLoserMessageToUI then
+            AddLoserMessageToUI(message)
+        end
+
     end
 end
 

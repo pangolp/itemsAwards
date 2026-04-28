@@ -2,8 +2,9 @@ require "ISUI/ISPanel"
 require "ISUI/ISButton"
 require "ISUI/ISScrollingListBox"
 
+awardsWelcomeWindow = nil
+
 AwardsWelcomeUI = ISPanel:derive("AwardsWelcomeUI")
-AwardsWelcomeUI.instance = nil
 
 function AwardsWelcomeUI:initialise()
     ISPanel.initialise(self)
@@ -17,47 +18,64 @@ function AwardsWelcomeUI:prerender()
     self:drawText(getText("UI_instructions"), 10, 70, 0.8, 0.8, 0.8, 1, UIFont.Small)
 end
 
-function AwardsWelcomeUI:createScrollList(x, y, drawItemFn)
-    local list = ISScrollingListBox:new(x, y, self.width - 20, 110)
-    list:initialise()
-    list:instantiate()
-    list.itemheight = 22
-    list.selected = 0
-    list.joypadParent = self
-    list.font = UIFont.NewSmall
-    list.doDrawItem = drawItemFn
-    self:addChild(list)
-    return list
-end
-
 function AwardsWelcomeUI:create()
     local btnWidth = 100
     local btnHeight = 25
 
-    self.awardsList = self:createScrollList(10, 100, self.drawAwardItem)
+    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 110)
+    self.awardsList:initialise()
+    self.awardsList:instantiate()
+    self.awardsList.itemheight = 22
+    self.awardsList.selected = 0
+    self.awardsList.joypadParent = self
+    self.awardsList.font = UIFont.NewSmall
+    self.awardsList.doDrawItem = self.drawAwardItem
     self.awardsList:setOnMouseDoubleClick(self, self.onAwardDoubleClick)
+    self:addChild(self.awardsList)
 
-    local losersY = self.awardsList:getY() + self.awardsList:getHeight() + 10
-    self.losersList = self:createScrollList(10, losersY, self.drawLoserItem)
-
-    local btnsY = self.losersList:getY() + self.losersList:getHeight() + 10
+    self.losersList = ISScrollingListBox:new(10, self.awardsList:getY() + self.awardsList:getHeight() + 10, self.width - 20, 110)
+    self.losersList:initialise()
+    self.losersList:instantiate()
+    self.losersList.itemheight = 22
+    self.awardsList.selected = 0
+    self.losersList.font = UIFont.NewSmall
+    self.losersList.doDrawItem = self.drawLoserItem
+    self:addChild(self.losersList)
 
     self.closeButton = ISButton:new(
-        self.width - 490, btnsY, btnWidth, btnHeight,
-        getText("UI_Close"), self, AwardsWelcomeUI.onCloseClick
+        self.width - 490,
+        self.losersList:getY() + self.losersList:getHeight() + 10,
+        btnWidth,
+        btnHeight,
+        getText("UI_Close"),
+        self,
+        AwardsWelcomeUI.onCloseClick
     )
+
     self:addChild(self.closeButton)
 
     self.cleanButton = ISButton:new(
-        self.closeButton:getX() + btnWidth + 10, btnsY, btnWidth, btnHeight,
-        getText("UI_clean"), self, AwardsWelcomeUI.onCleanClick
+        self.closeButton:getX() + btnWidth + 10,
+        self.losersList:getY() + self.losersList:getHeight() + 10,
+        btnWidth,
+        btnHeight,
+        getText("UI_clean"),
+        self,
+        AwardsWelcomeUI.onCleanClick
     )
+
     self:addChild(self.cleanButton)
 
     self.cleanLoserButton = ISButton:new(
-        self.cleanButton:getX() + btnWidth + 10, btnsY, btnWidth, btnHeight,
-        getText("UI_clean_loser"), self, AwardsWelcomeUI.onCleanLoserClick
+        self.cleanButton:getX() + btnWidth + 10,
+        self.losersList:getY() + self.losersList:getHeight() + 10,
+        btnWidth,
+        btnHeight,
+        getText("UI_clean_loser"),
+        self,
+        AwardsWelcomeUI.onCleanLoserClick
     )
+
     self:addChild(self.cleanLoserButton)
 end
 
@@ -157,7 +175,7 @@ function AwardsWelcomeUI:new(x, y, width, height)
 end
 
 function CreateWelcomeWindow()
-    if AwardsWelcomeUI.instance then return end
+    if awardsWelcomeWindow then return end
 
     local screenW = getCore():getScreenWidth()
     local screenH = getCore():getScreenHeight()
@@ -166,54 +184,27 @@ function CreateWelcomeWindow()
     local x = (screenW - width) / 2 + 400
     local y = (screenH - height) / 2
 
-    AwardsWelcomeUI.instance = AwardsWelcomeUI:new(x, y, width, height)
-    AwardsWelcomeUI.instance:initialise()
-    AwardsWelcomeUI.instance:addToUIManager()
-    AwardsWelcomeUI.instance:setVisible(false)
+    awardsWelcomeWindow = AwardsWelcomeUI:new(x, y, width, height)
+    awardsWelcomeWindow:initialise()
+    awardsWelcomeWindow:addToUIManager()
+    awardsWelcomeWindow:setVisible(false)
 end
 
 AwardsHUDButton = ISButton:derive("AwardsHUDButton")
 AwardsHUDButton.instance = nil
 
-function AwardsHUDButton:onMouseDown(x, y)
-    self.dragging = true
-    self.dragX = x
-    self.dragY = y
-end
-
-function AwardsHUDButton:onMouseMove(dx, dy)
-    if not self.dragging then return end
-    local newX = self:getX() + dx
-    local newY = self:getY() + dy
-    self:setX(newX)
-    self:setY(newY)
-end
-
-function AwardsHUDButton:onMouseUp(x, y)
-    if not self.dragging then return end
-    self.dragging = false
-
-    local player = getSpecificPlayer(0)
-    if player then
-        local modData = player:getModData()
-        modData.AwardsButtonX = self:getX()
-        modData.AwardsButtonY = self:getY()
-        player:save()
-    end
-end
-
 function AwardsHUDButton:new(x, y, width, height)
 
     local o = ISButton:new(x, y, width, height, "", nil, function()
-        if AwardsWelcomeUI.instance and AwardsWelcomeUI.instance:isVisible() then
-            AwardsWelcomeUI.instance:setVisible(false)
-            AwardsWelcomeUI.instance:removeFromUIManager()
+        if awardsWelcomeWindow and awardsWelcomeWindow:isVisible() then
+            awardsWelcomeWindow:setVisible(false)
+            awardsWelcomeWindow:removeFromUIManager()
         else
-            if not AwardsWelcomeUI.instance then
+            if not awardsWelcomeWindow then
                 CreateWelcomeWindow()
             else
-                AwardsWelcomeUI.instance:setVisible(true)
-                AwardsWelcomeUI.instance:addToUIManager()
+                awardsWelcomeWindow:setVisible(true)
+                awardsWelcomeWindow:addToUIManager()
             end
         end
     end)
@@ -231,18 +222,8 @@ end
 local function createHUDButton()
     if AwardsHUDButton.instance then return end
     local btnSize = 32
-
     local x = getCore():getScreenWidth() - 50
     local y = 600
-
-    local player = getSpecificPlayer(0)
-    if player then
-        local modData = player:getModData()
-        if modData.AwardsButtonX and modData.AwardsButtonY then
-            x = modData.AwardsButtonX
-            y = modData.AwardsButtonY
-        end
-    end
 
     local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
     btn:setAnchorLeft(false)
@@ -255,35 +236,28 @@ local function createHUDButton()
     AwardsHUDButton.instance = btn
 end
 
-function AddAwardMessageToUI(_item, _message)
-    if AwardsWelcomeUI.instance then
-        AwardsWelcomeUI.instance:addAwardMessage(_item, _message)
-    end
-end
-
-function AddLoserMessageToUI(_message)
-    if AwardsWelcomeUI.instance then
-        AwardsWelcomeUI.instance:addLoserMessage(_message)
-    end
-end
-
 local function OnGameStart()
-    if not Awards.dataFileLoaded then
-        local player = getSpecificPlayer(0)
-        if player then
-            player:Say(getText("IGUI_Awards_MissingDataFile"))
-        end
-    end
 
-    local onTick
-    onTick = function()
-        if not AwardsWelcomeUI.instance then
+    Events.OnTick.Add(function()
+        if not awardsWelcomeWindow then
             CreateWelcomeWindow()
+            Events.OnTick.Remove(this)
         end
-        Events.OnTick.Remove(onTick)
-    end
-    Events.OnTick.Add(onTick)
+    end)
+
     createHUDButton()
+end
+
+function AddAwardMessageToUI(_item, _message)
+    if awardsWelcomeWindow then
+        awardsWelcomeWindow:addAwardMessage(_item, _message)
+    end
+end
+
+function AddLoserMessageToUI(message)
+    if awardsWelcomeWindow then
+        awardsWelcomeWindow:addLoserMessage(message)
+    end
 end
 
 Events.OnGameStart.Add(OnGameStart)
