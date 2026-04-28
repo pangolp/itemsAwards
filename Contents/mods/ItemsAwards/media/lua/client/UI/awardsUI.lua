@@ -256,7 +256,7 @@ end
 
 function AddLoserMessageToUI(_message)
     if AwardsWelcomeUI.instance then
-        AwardsWelcomeUI.instance:addAwardMessage(_item, _message)
+        AwardsWelcomeUI.instance:addLoserMessage(_message)
     end
 end
 
