@@ -2,9 +2,8 @@ require "ISUI/ISPanel"
 require "ISUI/ISButton"
 require "ISUI/ISScrollingListBox"
 
-AwardsWelcomeUI.instance = nil
-
 AwardsWelcomeUI = ISPanel:derive("AwardsWelcomeUI")
+AwardsWelcomeUI.instance = nil
 
 function AwardsWelcomeUI:initialise()
     ISPanel.initialise(self)
