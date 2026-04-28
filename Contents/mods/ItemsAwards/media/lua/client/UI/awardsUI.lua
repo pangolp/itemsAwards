@@ -175,6 +175,33 @@ end
 AwardsHUDButton = ISButton:derive("AwardsHUDButton")
 AwardsHUDButton.instance = nil
 
+function AwardsHUDButton:onMouseDown(x, y)
+    self.dragging = true
+    self.dragX = x
+    self.dragY = y
+end
+
+function AwardsHUDButton:onMouseMove(dx, dy)
+    if not self.dragging then return end
+    local newX = self:getX() + dx
+    local newY = self:getY() + dy
+    self:setX(newX)
+    self:setY(newY)
+end
+
+function AwardsHUDButton:onMouseUp(x, y)
+    if not self.dragging then return end
+    self.dragging = false
+
+    local player = getSpecificPlayer(0)
+    if player then
+        local modData = player:getModData()
+        modData.AwardsButtonX = self:getX()
+        modData.AwardsButtonY = self:getY()
+        player:save()
+    end
+end
+
 function AwardsHUDButton:new(x, y, width, height)
 
     local o = ISButton:new(x, y, width, height, "", nil, function()
@@ -204,8 +231,18 @@ end
 local function createHUDButton()
     if AwardsHUDButton.instance then return end
     local btnSize = 32
+
     local x = getCore():getScreenWidth() - 50
     local y = 600
+
+    local player = getSpecificPlayer(0)
+    if player then
+        local modData = player:getModData()
+        if modData.AwardsButtonX and modData.AwardsButtonY then
+            x = modData.AwardsButtonX
+            y = modData.AwardsButtonY
+        end
+    end
 
     local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
     btn:setAnchorLeft(false)
