@@ -219,18 +219,6 @@ local function createHUDButton()
     AwardsHUDButton.instance = btn
 end
 
-local function OnGameStart()
-
-    Events.OnTick.Add(function()
-        if not awardsWelcomeWindow then
-            CreateWelcomeWindow()
-            Events.OnTick.Remove(this)
-        end
-    end)
-
-    createHUDButton()
-end
-
 function AddAwardMessageToUI(_item, _message)
     if AwardsWelcomeUI.instance then
         AwardsWelcomeUI.instance:addAwardMessage(_item, _message)
@@ -241,6 +229,18 @@ function AddLoserMessageToUI(_message)
     if AwardsWelcomeUI.instance then
         AwardsWelcomeUI.instance:addLoserMessage(_message)
     end
+end
+
+local function OnGameStart()
+    local onTick
+    onTick = function()
+        if not AwardsWelcomeUI.instance then
+            CreateWelcomeWindow()
+        end
+        Events.OnTick.Remove(onTick)
+    end
+    Events.OnTick.Add(onTick)
+    createHUDButton()
 end
 
 Events.OnGameStart.Add(OnGameStart)
