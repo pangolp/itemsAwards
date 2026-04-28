@@ -1,0 +1,5 @@
+{
+    "IGUI_WonItem" : "[Items Awards]: You have won: %1. Amount: %2",
+    "IGUI_LoseItem" : "[Items Awards]: Your number was: %1. Keep trying!",
+    "IGUI_YouNeedMoreKills" : "[Items Awards]: You won with %1, but the prize requires more kills: %2"
+}
