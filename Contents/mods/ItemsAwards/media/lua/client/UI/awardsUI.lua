@@ -2,7 +2,7 @@ require "ISUI/ISPanel"
 require "ISUI/ISButton"
 require "ISUI/ISScrollingListBox"
 
-awardsWelcomeWindow = nil
+AwardsWelcomeUI.instance = nil
 
 AwardsWelcomeUI = ISPanel:derive("AwardsWelcomeUI")
 
@@ -175,7 +175,7 @@ function AwardsWelcomeUI:new(x, y, width, height)
 end
 
 function CreateWelcomeWindow()
-    if awardsWelcomeWindow then return end
+    if AwardsWelcomeUI.instance then return end
 
     local screenW = getCore():getScreenWidth()
     local screenH = getCore():getScreenHeight()
@@ -184,10 +184,10 @@ function CreateWelcomeWindow()
     local x = (screenW - width) / 2 + 400
     local y = (screenH - height) / 2
 
-    awardsWelcomeWindow = AwardsWelcomeUI:new(x, y, width, height)
-    awardsWelcomeWindow:initialise()
-    awardsWelcomeWindow:addToUIManager()
-    awardsWelcomeWindow:setVisible(false)
+    AwardsWelcomeUI.instance = AwardsWelcomeUI:new(x, y, width, height)
+    AwardsWelcomeUI.instance:initialise()
+    AwardsWelcomeUI.instance:addToUIManager()
+    AwardsWelcomeUI.instance:setVisible(false)
 end
 
 AwardsHUDButton = ISButton:derive("AwardsHUDButton")
@@ -196,15 +196,15 @@ AwardsHUDButton.instance = nil
 function AwardsHUDButton:new(x, y, width, height)
 
     local o = ISButton:new(x, y, width, height, "", nil, function()
-        if awardsWelcomeWindow and awardsWelcomeWindow:isVisible() then
-            awardsWelcomeWindow:setVisible(false)
-            awardsWelcomeWindow:removeFromUIManager()
+        if AwardsWelcomeUI.instance and AwardsWelcomeUI.instance:isVisible() then
+            AwardsWelcomeUI.instance:setVisible(false)
+            AwardsWelcomeUI.instance:removeFromUIManager()
         else
-            if not awardsWelcomeWindow then
+            if not AwardsWelcomeUI.instance then
                 CreateWelcomeWindow()
             else
-                awardsWelcomeWindow:setVisible(true)
-                awardsWelcomeWindow:addToUIManager()
+                AwardsWelcomeUI.instance:setVisible(true)
+                AwardsWelcomeUI.instance:addToUIManager()
             end
         end
     end)
@@ -249,14 +249,14 @@ local function OnGameStart()
 end
 
 function AddAwardMessageToUI(_item, _message)
-    if awardsWelcomeWindow then
-        awardsWelcomeWindow:addAwardMessage(_item, _message)
+    if AwardsWelcomeUI.instance then
+        AwardsWelcomeUI.instance:addAwardMessage(_item, _message)
     end
 end
 
-function AddLoserMessageToUI(message)
-    if awardsWelcomeWindow then
-        awardsWelcomeWindow:addLoserMessage(message)
+function AddLoserMessageToUI(_message)
+    if AwardsWelcomeUI.instance then
+        AwardsWelcomeUI.instance:addLoserMessage(_message)
     end
 end
 
