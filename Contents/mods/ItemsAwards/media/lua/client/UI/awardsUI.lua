@@ -198,11 +198,37 @@ function CreateWelcomeWindow()
 end
 
 -- ============================================================
---  HUD Button
+--  HUD Button (draggable, position persisted across sessions)
 -- ============================================================
 
 AwardsHUDButton          = ISButton:derive("AwardsHUDButton")
 AwardsHUDButton.instance = nil
+
+local HUD_BUTTON_POS_FILE = "ItemsAwards_hudButtonPos.txt"
+local HUD_BUTTON_DRAG_THRESHOLD = 3
+
+local function clamp(value, minValue, maxValue)
+    if value < minValue then return minValue end
+    if value > maxValue then return maxValue end
+    return value
+end
+
+local function saveHUDButtonPosition(x, y)
+    local writer = getFileWriter(HUD_BUTTON_POS_FILE, true, false)
+    if not writer then return end
+    writer:write(tostring(math.floor(x)) .. "\n")
+    writer:write(tostring(math.floor(y)) .. "\n")
+    writer:close()
+end
+
+local function loadHUDButtonPosition()
+    local reader = getFileReader(HUD_BUTTON_POS_FILE, true)
+    if not reader then return nil, nil end
+    local lineX = reader:readLine()
+    local lineY = reader:readLine()
+    reader:close()
+    return lineX and tonumber(lineX), lineY and tonumber(lineY)
+end
 
 function AwardsHUDButton:new(x, y, width, height)
     local o = ISButton:new(x, y, width, height, "", nil, function()
@@ -223,17 +249,85 @@ function AwardsHUDButton:new(x, y, width, height)
     o.backgroundColor          = {r=0, g=0, b=0, a=0}
     o.backgroundColorMouseOver = {r=1, g=1, b=1, a=0.1}
     o.borderColor              = {r=0, g=0, b=0, a=0}
+    o.dragging                 = false
+    o.dragMoved                = false
     return o
 end
+
+-- ---- Drag handling: hold the icon and move it; a plain click still
+--      toggles the panel as before.
+--
+--      The button's own onMouseMove only fires while the cursor stays
+--      over it, so a fast mouse movement outruns a small 32x32 icon
+--      and the drag freezes. Instead, track the absolute mouse
+--      position every tick (independent of hover) while dragging. ----
+
+function AwardsHUDButton:onMouseDown(x, y)
+    self.dragging        = true
+    self.dragMoved        = false
+    self.dragStartMouseX = getMouseX()
+    self.dragStartMouseY = getMouseY()
+    self.dragStartBtnX   = self:getX()
+    self.dragStartBtnY   = self:getY()
+    ISButton.onMouseDown(self, x, y)
+end
+
+function AwardsHUDButton:onMouseUp(x, y)
+    self.dragging = false
+    if self.dragMoved then
+        self.dragMoved = false
+        saveHUDButtonPosition(self:getX(), self:getY())
+        return
+    end
+    ISButton.onMouseUp(self, x, y)
+end
+
+function AwardsHUDButton:onMouseUpOutside(x, y)
+    self.dragging = false
+    if self.dragMoved then
+        self.dragMoved = false
+        saveHUDButtonPosition(self:getX(), self:getY())
+    end
+    if ISButton.onMouseUpOutside then
+        ISButton.onMouseUpOutside(self, x, y)
+    end
+end
+
+local function updateHUDButtonDrag()
+    local btn = AwardsHUDButton.instance
+    if not btn or not btn.dragging then return end
+
+    local totalDX = getMouseX() - btn.dragStartMouseX
+    local totalDY = getMouseY() - btn.dragStartMouseY
+
+    if math.abs(totalDX) > HUD_BUTTON_DRAG_THRESHOLD or math.abs(totalDY) > HUD_BUTTON_DRAG_THRESHOLD then
+        btn.dragMoved = true
+    end
+
+    local maxX = getCore():getScreenWidth()  - btn:getWidth()
+    local maxY = getCore():getScreenHeight() - btn:getHeight()
+    btn:setX(clamp(btn.dragStartBtnX + totalDX, 0, maxX))
+    btn:setY(clamp(btn.dragStartBtnY + totalDY, 0, maxY))
+end
+
+Events.OnTick.Add(updateHUDButtonDrag)
 
 local function createHUDButton()
     if AwardsHUDButton.instance then return end
     local btnSize = 32
-    local btn = AwardsHUDButton:new(getCore():getScreenWidth() - 50, 600, btnSize, btnSize)
-    btn:setAnchorLeft(false)
-    btn:setAnchorRight(true)
-    btn:setAnchorTop(true)
-    btn:setAnchorBottom(false)
+
+    -- Default to the top-left corner: always on screen regardless of
+    -- resolution. Once the player drags the icon, the saved spot is
+    -- used instead (also clamped, in case the resolution changed since).
+    local maxX = getCore():getScreenWidth()  - btnSize
+    local maxY = getCore():getScreenHeight() - btnSize
+    local savedX, savedY = loadHUDButtonPosition()
+    local x = clamp(savedX or 10, 0, maxX)
+    local y = clamp(savedY or 10, 0, maxY)
+
+    -- No anchors: the button is positioned/persisted manually via drag,
+    -- and anchoring it to an edge fights setX()/setY() while dragging.
+    local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
     btn.tooltip = getText("UI_awards_button_tooltip")
     btn:initialise()
     btn:addToUIManager()
