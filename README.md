@@ -25,63 +25,54 @@ ItemsAwards/
 |-- Contents
 |   `-- mods
 |       `-- ItemsAwards
+|           |-- mod.info              (root copy, read directly by Build 41)
+|           |-- itemsAwards.png
+|           |-- media
+|           |   `-- lua
+|           |       |-- client
+|           |       |   |-- UI
+|           |       |   |   `-- awardsUI.lua
+|           |       |   |-- awardsClient.lua
+|           |       |   `-- awardsOptions.lua
+|           |       |-- server
+|           |       |   `-- awardsServer.lua
+|           |       `-- shared
+|           |           `-- Translate
+|           |               |-- AR / EN / ES (*.txt)
 |           |-- 42
 |           |   |-- itemsAwards.png
-|           |   |-- media
-|           |   |   `-- lua
-|           |   |       |-- client
-|           |   |       |   |-- ModOptions.lua
-|           |   |       |   |-- UI
-|           |   |       |   |   `-- awardsUI.lua
-|           |   |       |   `-- awards.lua
-|           |   |       `-- shared
-|           |   |           `-- Translate
-|           |   |               |-- AR
-|           |   |               |   |-- IG_UI.json
-|           |   |               |   |-- Tooltip.json
-|           |   |               |   `-- UI.json
-|           |   |               |-- EN
-|           |   |               |   |-- IG_UI.json
-|           |   |               |   |-- Tooltip.json
-|           |   |               |   `-- UI.json
-|           |   |               `-- ES
-|           |   |                   |-- IG_UI.json
-|           |   |                   |-- Tooltip.json
-|           |   |                   `-- UI.json
-|           |   `-- mod.info
+|           |   |-- mod.info
+|           |   `-- media
+|           |       `-- lua
+|           |           |-- client
+|           |           |   |-- ModOptions.lua          (B42 override: PZAPI.ModOptions)
+|           |           |   `-- UI
+|           |           |       `-- awardsUI_b42patch.lua
+|           |           `-- shared
+|           |               `-- Translate (AR/EN/ES *.json)
 |           `-- common
 |               |-- itemsAwards.png
-|               |-- media
-|               |   |-- lua
-|               |   |   |-- client
-|               |   |   |   |-- UI
-|               |   |   |   |   `-- awardsUI.lua
-|               |   |   |   |-- awards.lua
-|               |   |   |   `-- awardsOptions.lua
-|               |   |   `-- shared
-|               |   |       `-- Translate
-|               |   |           |-- AR
-|               |   |           |   |-- IG_UI_AR.txt
-|               |   |           |   |-- Tooltip_AR.txt
-|               |   |           |   `-- UI_AR.txt
-|               |   |           |-- EN
-|               |   |           |   |-- IG_UI_EN.txt
-|               |   |           |   |-- Tooltip_EN.txt
-|               |   |           |   `-- UI_EN.txt
-|               |   |           `-- ES
-|               |   |               |-- IG_UI_ES.txt
-|               |   |               |-- Tooltip_ES.txt
-|               |   |               `-- UI_ES.txt
-|               |   `-- ui
-|               |       `-- icons
-|               |           `-- gift_regular_icon.png
-|               `-- mod.info
+|               |-- mod.info
+|               `-- media
+|                   |-- lua
+|                   |   |-- client
+|                   |   |   |-- UI
+|                   |   |   |   `-- awardsUI.lua
+|                   |   |   |-- awardsClient.lua
+|                   |   |   `-- awardsOptions.lua
+|                   |   |-- server
+|                   |   |   `-- awardsServer.lua
+|                   |   `-- shared
+|                   |       `-- Translate (AR/EN/ES *.txt)
+|                   `-- ui
+|                       `-- icons
+|                           `-- gift_regular_icon.png
 |-- README.md
 |-- preview.png
 `-- workshop.txt
-
-25 directories, 32 files
 ```
+
+> The root copy (`mod.info` + `media/`) is what Build 41 reads directly. `common/` + `42/` is the same content plus B42-only overrides, used by Build 42's own version-merge mechanism. Keep root and `common/` in sync manually — there is no build step that does it for you.
 
 #### External link
 * [Steam WorkShop](https://steamcommunity.com/sharedfiles/filedetails/?id=2911373802)
