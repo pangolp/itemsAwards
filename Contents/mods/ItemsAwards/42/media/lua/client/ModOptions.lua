@@ -1,10 +1,18 @@
-Awards = Awards or {}
+--[[
+    ItemsAwards - Options Module (Build 42 only)
+    Uses PZAPI.ModOptions introduced in B42.
+    This file overrides awardsOptions.lua for B42 clients.
+--]]
+
+if isServer() and not isClient() then return end
+
+Awards         = Awards or {}
 Awards.Options = Awards.Options or {}
 
 Awards.Options.showNumberWhenLosing = false
-Awards.Options.showMessageInChat = false
-Awards.Options.limitWinningNumbers = 1
-Awards.Options.limitLosingNumbers = 1
+Awards.Options.showMessageInChat    = false
+Awards.Options.limitWinningNumbers  = 1
+Awards.Options.limitLosingNumbers   = 1
 
 local function applyAwardsOptions()
     local options = PZAPI.ModOptions:getOptions("ItemsAwards")
@@ -15,7 +23,7 @@ local function applyAwardsOptions()
     Awards.Options.limitWinningNumbers  = options:getOption("limitWin"):getValue()
     Awards.Options.limitLosingNumbers   = options:getOption("limitLose"):getValue()
 
-    print("Awards: Opciones actualizadas correctamente.")
+    print("[ItemsAwards] Options applied.")
 end
 
 local function InitAwardsOptions()
@@ -23,19 +31,30 @@ local function InitAwardsOptions()
 
     options:addTitle(getText("UI_Awards_Title"))
 
-    options:addTickBox("showNumber", getText("UI_Awards_showNumberWhenLosing"), Awards.Options.showNumberWhenLosing, getText("Tooltip_Awards_showNumberWhenLosing"))
-    options:addTickBox("showChat", getText("UI_Awards_showMessageInChat"), Awards.Options.showMessageInChat, getText("Tooltip_Awards_showMessageInChat"))
+    options:addTickBox("showNumber",
+        getText("UI_Awards_showNumberWhenLosing"),
+        Awards.Options.showNumberWhenLosing,
+        getText("Tooltip_Awards_showNumberWhenLosing"))
+
+    options:addTickBox("showChat",
+        getText("UI_Awards_showMessageInChat"),
+        Awards.Options.showMessageInChat,
+        getText("Tooltip_Awards_showMessageInChat"))
 
     options:addSeparator()
 
-    local comboWin = options:addComboBox("limitWin", getText("UI_Awards_limitWinningNumbers"), getText("Tooltip_Awards_limitWinningNumbers"))
-    comboWin:addItem("5", true)
+    local comboWin = options:addComboBox("limitWin",
+        getText("UI_Awards_limitWinningNumbers"),
+        getText("Tooltip_Awards_limitWinningNumbers"))
+    comboWin:addItem("5",  true)
     comboWin:addItem("10", false)
     comboWin:addItem("15", false)
     comboWin:addItem("20", false)
 
-    local comboLose = options:addComboBox("limitLose", getText("UI_Awards_limitLosingNumbers"), getText("Tooltip_Awards_limitLosingNumbers"))
-    comboLose:addItem("5", true)
+    local comboLose = options:addComboBox("limitLose",
+        getText("UI_Awards_limitLosingNumbers"),
+        getText("Tooltip_Awards_limitLosingNumbers"))
+    comboLose:addItem("5",  true)
     comboLose:addItem("10", false)
     comboLose:addItem("15", false)
     comboLose:addItem("20", false)
@@ -45,10 +64,5 @@ end
 
 InitAwardsOptions()
 
-Events.OnMainMenuEnter.Add(function()
-    applyAwardsOptions()
-end)
-
-Events.OnPreMapLoad.Add(function()
-    applyAwardsOptions()
-end)
+Events.OnMainMenuEnter.Add(applyAwardsOptions)
+Events.OnPreMapLoad.Add(applyAwardsOptions)

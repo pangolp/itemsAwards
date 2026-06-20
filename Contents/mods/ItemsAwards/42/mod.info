@@ -1,7 +1,5 @@
 name=Items Awards
 poster=itemsAwards.png
 id=ItemsAwards
-description=Rewards the player with items when eliminating a zombie
+description=Rewards the player with items when eliminating a zombie. Compatible with Build 41 and 42. Server-authoritative: all reward logic runs on the server.
 author=pangolp
-modversion=42-1.0.1
-versionMin=42.0.0
