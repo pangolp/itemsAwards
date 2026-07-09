@@ -11,5 +11,18 @@
     "UI_clean_loser" : "Clear: lost",
     "UI_Awards_limitWinningNumbers" : "Number of winning numbers",
     "UI_Awards_limitLosingNumbers" : "Number of losing numbers",
-    "UI_Awards_Title": "Items Awards Settings"
+    "UI_Awards_Title": "Items Awards Settings",
+    "UI_admin_manage" : "Manage Awards",
+    "UI_admin_panel_title" : "Awards Manager",
+    "UI_admin_item" : "Item type",
+    "UI_admin_number" : "Number (1-100)",
+    "UI_admin_count" : "Count",
+    "UI_admin_zkills" : "Min. kills",
+    "UI_admin_onZombie" : "On zombie",
+    "UI_admin_add" : "Add",
+    "UI_admin_save" : "Save",
+    "UI_admin_delete" : "Delete",
+    "UI_admin_reload" : "Reload",
+    "UI_admin_yes" : "Yes",
+    "UI_admin_no" : "No"
 }

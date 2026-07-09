@@ -74,6 +74,18 @@ function AwardsWelcomeUI:create()
         self.cleanButton:getX() + btnWidth + 10, btnsY, btnWidth, btnHeight,
         getText("UI_clean_loser"), self, AwardsWelcomeUI.onCleanLoserClick)
     self:addChild(self.cleanLoserButton)
+
+    -- Admin button: only shown to players with admin access
+    local p = getPlayer()
+    local level = p and p:getAccessLevel() or ""
+    local online = getOnlinePlayers()
+    local isSP = online and online:size() <= 1
+    if level == "admin" or level == "moderator" or isSP then
+        self.manageButton = ISButton:new(
+            self.cleanLoserButton:getX() + btnWidth + 10, btnsY, btnWidth + 20, btnHeight,
+            getText("UI_admin_manage"), self, AwardsWelcomeUI.onManageClick)
+        self:addChild(self.manageButton)
+    end
 end
 
 -- ---- Draw items ----
@@ -124,6 +136,10 @@ end
 
 function AwardsWelcomeUI:onCleanLoserClick()
     self.losersList:clear()
+end
+
+function AwardsWelcomeUI:onManageClick()
+    if OpenAwardsAdminPanel then OpenAwardsAdminPanel() end
 end
 
 function AwardsWelcomeUI:onAwardDoubleClick()

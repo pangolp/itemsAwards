@@ -7,6 +7,8 @@
       2. Server rolls the number and decides if the player wins.
       3. Server adds the item to the player's inventory.
       4. Server sends a command to the client so it can update the UI.
+
+    Awards table is managed by awardsData.lua (loaded before this file).
 --]]
 
 -- Guard: only run in server context (includes single-player host)
@@ -14,25 +16,10 @@ if isClient() and not isServer() then return end
 
 Awards = Awards or {}
 
--- Guard: this file can end up loaded as more than one physical copy
--- (e.g. root + common/ paths on B41). Only register everything once.
 if Awards._serverLoaded then return end
 Awards._serverLoaded = true
 
 Awards.Server = Awards.Server or {}
-
--- ============================================================
---  Award table - edit freely
---  Item      : full item type string (e.g. "Base.Money")
---  Number    : the lucky number (1-100); must match exactly
---  Count     : how many copies to give
---  zkills    : minimum zombie kills required to claim the prize
---  onZombie  : true  -> item added to the zombie (player loots it)
---              false -> item goes directly to the killer's inventory
--- ============================================================
-local itemsAwards = {
-    {Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false},
-}
 
 -- ============================================================
 --  Helper: add item to player inventory and sync to clients
@@ -56,10 +43,8 @@ end
 -- ============================================================
 local function notifyClient(player, cmd, args)
     if isServer() then
-        -- Multiplayer / coop: send over the network
         sendServerCommand(player, "ItemsAwards", cmd, args)
     else
-        -- Single-player: call the client handler directly (no network)
         if Awards.Client and Awards.Client.onServerCommand then
             Awards.Client.onServerCommand(cmd, args)
         end
@@ -67,11 +52,28 @@ local function notifyClient(player, cmd, args)
 end
 
 -- ============================================================
+--  Admin helpers
+-- ============================================================
+local function playerIsAdmin(player)
+    local level = player:getAccessLevel()
+    if level == "admin" or level == "moderator" then return true end
+    -- Single-player: only one player online
+    local online = getOnlinePlayers()
+    return online and online:size() == 1
+end
+
+local function sendAwardsList(player)
+    local list = {}
+    for i, v in ipairs(Awards.Data.getAll()) do
+        list[i] = {Item = v.Item, Number = v.Number, Count = v.Count, zkills = v.zkills, onZombie = v.onZombie}
+    end
+    notifyClient(player, "awardsList", {awards = list})
+end
+
+-- ============================================================
 --  Main logic: runs on every zombie death (server-side only)
 -- ============================================================
 local function ZombKilled(zombie)
-    -- OnZombieDead can fire more than once for the same zombie
-    -- (observed with debug-mode kills). Guard against double-processing.
     local modData = zombie:getModData()
     if modData.ItemsAwardsProcessed then return end
     modData.ItemsAwardsProcessed = true
@@ -88,40 +90,28 @@ local function ZombKilled(zombie)
     local countZombieKill = attacker:getZombieKills() + 1
     local won             = false
 
-    for _, value in pairs(itemsAwards) do
+    for _, value in pairs(Awards.Data.getAll()) do
 
         if number == value.Number then
 
             if countZombieKill >= value.zkills then
-                -- WIN: give the item
                 if value.onZombie then
                     giveItemToZombie(zombie, value.Item, value.Count)
                 else
                     giveItemToPlayer(attacker, value.Item, value.Count)
                 end
 
-                local itemName = ""
-                if getItemNameFromFullType then
-                    itemName = getItemNameFromFullType(value.Item)
-                else
-                    itemName = value.Item
-                end
-
-                local winMsg = string.format(getText("IGUI_WonItem"),    itemName, value.Count)
-                local uiMsg  = string.format(getText("UI_awardMessage"), itemName, value.Count)
+                local itemName = getItemNameFromFullType and getItemNameFromFullType(value.Item) or value.Item
 
                 notifyClient(attacker, "award", {
                     item     = value.Item,
-                    message  = winMsg,
-                    uiMsg    = uiMsg,
+                    message  = string.format(getText("IGUI_WonItem"),    itemName, value.Count),
+                    uiMsg    = string.format(getText("UI_awardMessage"), itemName, value.Count),
                     onZombie = value.onZombie,
                 })
-
             else
-                -- NOT ENOUGH KILLS
-                local needMsg = string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills)
                 notifyClient(attacker, "needKills", {
-                    message = needMsg,
+                    message = string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills),
                 })
             end
 
@@ -131,20 +121,58 @@ local function ZombKilled(zombie)
     end
 
     if not won then
-        -- LOSING ROLL
-        local loseMsg = string.format(getText("IGUI_LoseItem"), number)
         notifyClient(attacker, "loser", {
-            message = loseMsg,
+            message = string.format(getText("IGUI_LoseItem"), number),
         })
     end
 end
 
 Events.OnZombieDead.Add(ZombKilled)
 
--- Reserved for future client->server commands
+-- ============================================================
+--  Client → Server commands
+-- ============================================================
 local function OnClientCommand(module, command, player, args)
     if module ~= "ItemsAwards" then return end
+
+    if not playerIsAdmin(player) then return end
+
+    if command == "getAwards" then
+        sendAwardsList(player)
+
+    elseif command == "addAward" then
+        if not args or not args.Item or not args.Number then return end
+        Awards.Data.add({
+            Item     = tostring(args.Item),
+            Number   = tonumber(args.Number) or 0,
+            Count    = tonumber(args.Count)  or 1,
+            zkills   = tonumber(args.zkills) or 1,
+            onZombie = args.onZombie == true,
+        })
+        sendAwardsList(player)
+
+    elseif command == "updateAward" then
+        if not args or not args.index then return end
+        Awards.Data.update(tonumber(args.index), {
+            Item     = tostring(args.Item),
+            Number   = tonumber(args.Number) or 0,
+            Count    = tonumber(args.Count)  or 1,
+            zkills   = tonumber(args.zkills) or 1,
+            onZombie = args.onZombie == true,
+        })
+        sendAwardsList(player)
+
+    elseif command == "deleteAward" then
+        if not args or not args.index then return end
+        Awards.Data.remove(tonumber(args.index))
+        sendAwardsList(player)
+
+    elseif command == "reloadAwards" then
+        Awards.Data.load()
+        sendAwardsList(player)
+    end
 end
+
 Events.OnClientCommand.Add(OnClientCommand)
 
-print("[ItemsAwards] Server module loaded.")
+print("[ItemsAwards] Server module loaded (B41).")
