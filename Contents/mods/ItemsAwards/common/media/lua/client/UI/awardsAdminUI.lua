@@ -299,13 +299,17 @@ function AwardsAdminUI:buildUI()
     self:addChild(self.closeBtn)
 
     -- ===== ICONS =====
-    local texAdd   = getTexture("media/ui/icons/add.png")
-    local texEdit  = getTexture("media/ui/icons/edit.png")
-    local texTrash = getTexture("media/ui/icons/trash-solid.png")
+    local texAdd    = getTexture("media/ui/icons/add.png")
+    local texEdit   = getTexture("media/ui/icons/edit.png")
+    local texTrash  = getTexture("media/ui/icons/trash-solid.png")
+    local texReload = getTexture("media/ui/icons/reload.png")
+    local texClose  = getTexture("media/ui/icons/close.png")
 
     applyIcon(self.addBtn,    texAdd)
     applyIcon(self.saveBtn,   texEdit)
     applyIcon(self.deleteBtn, texTrash)
+    applyIcon(self.reloadBtn, texReload)
+    applyIcon(self.closeBtn,  texClose)
 
     self:clearForm()
 end

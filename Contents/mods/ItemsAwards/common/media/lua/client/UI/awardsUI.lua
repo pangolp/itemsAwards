@@ -21,6 +21,17 @@ require "ISUI/ISScrollingListBox"
 
 awardsWelcomeWindow = nil
 
+local function applyIcon(btn, tex)
+    if not tex then return end
+    local super = btn.render
+    function btn:render()
+        super(self)
+        local s  = self:getHeight() - 8
+        local iy = (self:getHeight() - s) * 0.5
+        self:drawTextureScaled(tex, 4, iy, s, s, 0.85, 1, 1, 1)
+    end
+end
+
 AwardsWelcomeUI = ISPanel:derive("AwardsWelcomeUI")
 
 function AwardsWelcomeUI:initialise()
@@ -93,6 +104,12 @@ function AwardsWelcomeUI:create()
             getText("UI_admin_manage"), self, AwardsWelcomeUI.onManageClick)
         self:addChild(self.manageButton)
     end
+
+    local texClean = getTexture("media/ui/icons/clean.png")
+    local texClose = getTexture("media/ui/icons/close.png")
+    applyIcon(self.cleanButton,      texClean)
+    applyIcon(self.cleanLoserButton, texClean)
+    applyIcon(self.closeButton,      texClose)
 end
 
 -- ---- Draw items ----
