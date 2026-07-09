@@ -45,6 +45,8 @@ Accesible para admins y moderadores (siempre visible en single-player) mediante 
 
 La barra inferior del panel de administración muestra el valor actual del dado máximo. Cambiá el número y hacé clic en **Aplicar** para guardarlo inmediatamente. El servidor lo persiste en `ItemsAwards_config.txt` y lo usa en todos los rolls siguientes. Intentar agregar o editar un número de premio mayor al máximo actual es bloqueado con un mensaje de error.
 
+Los premios de la lista cuyo número supere el máximo actual se resaltan en naranja/rojo con el prefijo `!` para que se puedan identificar y corregir fácilmente.
+
 ## Log de ganadores
 
 El servidor agrega una línea a `ItemsAwards_winners_log.txt` cada vez que un jugador gana un ítem:
@@ -101,14 +103,14 @@ Contents/mods/ItemsAwards/
 |   |   |   |   |-- awardsData.lua
 |   |   |   |   `-- awardsServer.lua
 |   |   |   `-- shared/Translate/
-|   |   |       `-- AR | EN | ES  (*.txt)
+|   |   |       `-- AR | EN | ES  (*.json)
 |   |   `-- ui/icons/
 `-- 42/                         Solo marcador para Build 42
     |-- mod.info
     `-- itemsAwards.png
 ```
 
-> Si agregás una clave de traducción, hacelo en **ambos**: `media/shared/Translate/` (B41) y `common/media/lua/shared/Translate/` (B42). No hay ningún paso de sincronización automática.
+> Si agregás una clave de traducción, hacelo en **ambos**: `media/shared/Translate/` (B41, formato `.txt` tabla Lua) y `common/media/lua/shared/Translate/` (B42, formato `.json`). No hay ningún paso de sincronización automática. B42 usa placeholders `%1`/`%2`; B41 usa `%s`/`%d` con `string.format`.
 
 ## Enlaces
 

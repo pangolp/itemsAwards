@@ -50,9 +50,11 @@ archivos server-side.
 | Opciones de mod | `awardsOptions.lua` con `ModOptions:getInstance()` | `awardsOptions.lua` con `PZAPI.ModOptions:create()` |
 | `getText` con placeholders | `string.format(getText(key), ...)` con `%s/%d` | `getText(key, arg1, arg2)` variádico con `%1/%2` |
 | Textura de ítem en la UI | `InventoryItemFactory.CreateItem(item):getTex()` | `getScriptManager():getItem(item):getNormalTexture()` |
-| Traducciones | `.txt` con tablas Lua en `media/lua/shared/Translate/` | mismo formato, en `common/media/lua/shared/Translate/` |
+| Traducciones | `.txt` tabla Lua en `media/lua/shared/Translate/{EN,ES,AR}/UI_EN.txt` etc. | `.json` en `common/media/lua/shared/Translate/{EN,ES,AR}/UI.json` |
 | Sync de inv. al dar ítem | `sendAddItemToContainer(inv, item)` | no necesario (B42 lo maneja) |
 | Guard de cliente en common/ | N/A | `if not PZAPI then return end` al inicio |
+
+**Importante**: al agregar una clave de traducción, editá **ambos** archivos. Los formatos son distintos: B41 usa tabla Lua (`UI_ES = { key = "value" }`), B42 usa JSON puro (`{ "key": "value" }`). Los placeholders también difieren: B41 `%s`/`%d` con `string.format`, B42 `%1`/`%2` con `getText(key, arg)` — aunque si el código B42 usa `string.format` para armar el string antes de llamar `setText/setStatus`, los placeholders siguen siendo `%s`/`%d`.
 
 Cada diferencia vive en el archivo nativo de su build, sin shims de
 compatibilidad. Si necesitás cambiar algo en ambas builds, editá el archivo
@@ -90,7 +92,11 @@ Todo cuelga del global `Awards`:
   con listado de premios, formulario de edición, validación de ítem y campo de
   dado máximo. Solo accesible para admins/moderadores (o en single-player). Se
   comunica con el servidor vía `sendClientCommand` en multijugador, o llama
-  directamente a `Awards.Data` en single-player.
+  directamente a `Awards.Data` en single-player. Constantes de layout: `W=610`,
+  `H=520`, `STATUS_H=56`, `COL_SEP=295`, `LIST_H=285`. Los premios con
+  `Number > maxDice` se muestran en la lista con prefijo `!` y texto naranja/rojo
+  (`drawRow` + `refreshList`). Los mensajes de estado/hint aparecen en una franja
+  de ancho completo al pie del panel.
 
 ## Archivos generados en runtime (server-side)
 
@@ -168,6 +174,13 @@ dibujar la textura a la izquierda del texto. Están en `media/ui/icons/` y en
 | `clean.png` | Limpiar ganados / perdidos (jugador) |
 | `gift_regular_icon.png` | Botón HUD |
 
+## Layout del panel del jugador
+
+Los botones de `AwardsWelcomeUI` usan un layout de 2 filas × 2 columnas
+(`halfW ≈ (width - PAD*3) / 2`):
+- Fila 1: "Limpiar ganados" | "Limpiar perdidos"
+- Fila 2: "Cerrar" | "Gestionar Premios" (solo admins/SP)
+
 ## Cómo probar cambios
 
 No hay tests automatizados ni build step.
@@ -179,7 +192,8 @@ No hay tests automatizados ni build step.
 3. Verificar `Zomboid/Lua/ItemsAwards_winners_log.txt` para confirmar que el
    log se escribe correctamente al ganar.
 4. Abrir el panel admin y probar: agregar un premio con número > maxDice (debe
-   dar error), cambiar el maxDice, recargar la lista.
+   dar error), cambiar el maxDice, recargar la lista. Verificar que los premios
+   con número mayor al nuevo maxDice aparecen con prefijo `!` y en naranja/rojo.
 5. Si cambiás lógica de servidor, verificar que el cliente recibe el comando
    correcto (`award`, `needKills`, `loser`).
 

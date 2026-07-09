@@ -45,6 +45,8 @@ Accessible to admins and moderators (always visible in single-player) via the **
 
 The bottom bar of the admin panel shows the current max dice value. Change the number and click **Apply** to save immediately. The server stores this in `ItemsAwards_config.txt` and will use it for all future rolls. Adding or editing an award number greater than the current max is blocked with an error.
 
+Awards in the list whose number exceeds the current max are highlighted in orange/red and prefixed with `!` so they are easy to spot and correct.
+
 ## Winner log
 
 The server appends one line to `ItemsAwards_winners_log.txt` every time a player wins an item:
@@ -101,14 +103,14 @@ Contents/mods/ItemsAwards/
 |   |   |   |   |-- awardsData.lua
 |   |   |   |   `-- awardsServer.lua
 |   |   |   `-- shared/Translate/
-|   |   |       `-- AR | EN | ES  (*.txt)
+|   |   |       `-- AR | EN | ES  (*.json)
 |   |   `-- ui/icons/
 `-- 42/                         Build 42 marker only
     |-- mod.info
     `-- itemsAwards.png
 ```
 
-> If you add a translation key, do it in **both** `media/shared/Translate/` (B41) and `common/media/lua/shared/Translate/` (B42 — not yet present, inherits from media). There is no sync step.
+> If you add a translation key, do it in **both** `media/shared/Translate/` (B41, `.txt` Lua table format) and `common/media/lua/shared/Translate/` (B42, `.json` format). There is no sync step. B42 uses `%1`/`%2` placeholders; B41 uses `%s`/`%d` with `string.format`.
 
 ## Links
 
