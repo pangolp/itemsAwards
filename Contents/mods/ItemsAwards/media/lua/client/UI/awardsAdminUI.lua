@@ -16,14 +16,15 @@ require "ISUI/ISLabel"
 AwardsAdminUI          = ISPanel:derive("AwardsAdminUI")
 AwardsAdminUI.instance = nil
 
-local W       = 610
-local H       = 460
-local PAD     = 12
-local BTN_H   = 24
-local FIELD_H = 24
-local COL_SEP = 295
-local LIST_H  = 255
-local ROW_H   = 24
+local W        = 610
+local H        = 500
+local STATUS_H = 40
+local PAD      = 12
+local BTN_H    = 24
+local FIELD_H  = 24
+local COL_SEP  = 295
+local LIST_H   = 285
+local ROW_H    = 24
 
 -- ---- Helpers ----
 
@@ -166,7 +167,7 @@ function AwardsAdminUI:buildUI()
     local FIELD_GAP = 10
 
     -- ===== LEFT COLUMN =====
-    local lY = 42
+    local lY = 55
 
     self.list = ISScrollingListBox:new(PAD, lY, leftW, LIST_H)
     self.list:initialise()
@@ -253,7 +254,7 @@ function AwardsAdminUI:buildUI()
     self._formEndY = fY + BTN_H
 
     -- ===== BOTTOM BAR =====
-    local botY = H - BTN_H - PAD
+    local botY = H - STATUS_H - BTN_H - PAD
     self.reloadBtn = ISButton:new(PAD, botY, 120, BTN_H,
         tx("UI_admin_reload"), self, AwardsAdminUI.onReloadClick)
     self.reloadBtn:initialise()
@@ -308,32 +309,30 @@ function AwardsAdminUI:prerender()
     self:drawText(tx("UI_admin_list_header"), PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
     self:drawText(tx("UI_admin_form_header"), COL_SEP + PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
 
-    self:drawRect(COL_SEP, 26, 1, H - BTN_H - PAD - 6 - 26, 0.6, 0.4, 0.4, 0.4)
+    -- Vertical separator between columns
+    self:drawRect(COL_SEP, 26, 1, H - STATUS_H - BTN_H - PAD - 6 - 26, 0.6, 0.4, 0.4, 0.4)
 
-    local sepY = H - BTN_H - PAD - 8
+    -- Horizontal separator above bottom bar
+    local sepY = H - STATUS_H - BTN_H - PAD - 8
     self:drawRect(PAD, sepY, W - PAD * 2, 1, 0.6, 0.4, 0.4, 0.4)
 
-    local rightX     = COL_SEP + PAD
-    local statusTopY = (self._formEndY or 340) + 14
-    local statusBotY = sepY - 4
+    -- Separator above status area
+    self:drawRect(PAD, H - STATUS_H, W - PAD * 2, 1, 0.45, 0.35, 0.35, 0.5)
 
-    if statusTopY < statusBotY then
-        self:drawRect(rightX, statusTopY - 2, W - rightX - PAD, statusBotY - statusTopY + 4,
-            0.15, 0.1, 0.1, 0.12)
+    -- Status / hint area: full-width at the very bottom
+    local statusY = H - STATUS_H + 4
+    local hintText
+    if self._editIndex then
+        hintText = tx("UI_admin_editing") .. "  #" .. self._editIndex
+    else
+        hintText = tx("UI_admin_hint_dblclick")
+    end
+    self:drawText(hintText, PAD, statusY, 0.55, 0.65, 0.75, 1, UIFont.Small)
 
-        local hintText
-        if self._editIndex then
-            hintText = tx("UI_admin_editing") .. "  #" .. self._editIndex
-        else
-            hintText = tx("UI_admin_hint_dblclick")
-        end
-        self:drawText(hintText, rightX + 4, statusTopY, 0.55, 0.65, 0.75, 1, UIFont.Small)
-
-        if self._statusMsg then
-            local r = self._statusIsErr and 1   or 0.3
-            local g = self._statusIsErr and 0.3 or 1
-            self:drawText(self._statusMsg, rightX + 4, statusTopY + 18, r, g, 0.3, 1, UIFont.Small)
-        end
+    if self._statusMsg then
+        local r = self._statusIsErr and 1   or 0.3
+        local g = self._statusIsErr and 0.3 or 1
+        self:drawText(self._statusMsg, PAD, statusY + 18, r, g, 0.3, 1, UIFont.Small)
     end
 end
 
@@ -345,6 +344,10 @@ function AwardsAdminUI:drawRow(y, item, alt)
         self:drawRect(0, y, self:getWidth(), self.itemheight - 1, 0.5, 0.1, 0.4, 0.7)
     end
     if item.item then
+        local invalid = item.item.invalid
+        if invalid then
+            self:drawRect(0, y, self:getWidth(), self.itemheight - 1, 0.4, 0.6, 0.15, 0.05)
+        end
         local tex    = item.item.tex
         local iconSz = self.itemheight - 6
         local textX  = 6
@@ -352,7 +355,9 @@ function AwardsAdminUI:drawRow(y, item, alt)
             self:drawTextureScaled(tex, 3, y + 3, iconSz, iconSz, 1, 1, 1, 1)
             textX = iconSz + 7
         end
-        self:drawText(item.text, textX, y + 5, 1, 1, 1, a, self.font)
+        local r, g, b = 1, 1, 1
+        if invalid then r, g, b = 1, 0.4, 0.2 end
+        self:drawText(item.text, textX, y + 5, r, g, b, a, self.font)
     end
     return y + self.itemheight
 end
@@ -363,12 +368,15 @@ end
 
 function AwardsAdminUI:refreshList(awards)
     self.list:clear()
+    local maxD = self._maxDice or 100
     for i, e in ipairs(awards) do
-        local label = string.format("[%d] %s  x%d  kills>=%d  %s",
+        local invalid = (tonumber(e.Number) or 0) > maxD
+        local prefix  = invalid and "! " or ""
+        local label = prefix .. string.format("[%d] %s  x%d  kills>=%d  %s",
             e.Number, e.Item, e.Count, e.zkills,
             e.onZombie and "[Zombie]" or "[Inv]")
         local tex = getItemTex(e.Item)
-        self.list:insertItem(i, label, {index = i, data = e, tex = tex})
+        self.list:insertItem(i, label, {index = i, data = e, tex = tex, invalid = invalid})
     end
 end
 

@@ -47,11 +47,8 @@ function AwardsWelcomeUI:prerender()
 end
 
 function AwardsWelcomeUI:create()
-    local PAD     = 10
-    local btnH    = 25
-    local actionW = 120   -- Clean wins / Clean lost
-    local closeW  = 110
-    local manageW = 130
+    local PAD  = 10
+    local btnH = 25
 
     self.awardsList = ISScrollingListBox:new(PAD, 100, self.width - PAD * 2, 110)
     self.awardsList:initialise()
@@ -75,22 +72,24 @@ function AwardsWelcomeUI:create()
     self.losersList.doDrawItem = self.drawLoserItem
     self:addChild(self.losersList)
 
+    local halfW = math.floor((self.width - PAD * 3) / 2)
     local btnsY = self.losersList:getY() + self.losersList:getHeight() + PAD
 
-    -- Left group: action buttons (clear lists)
+    -- Row 1: clean buttons
     self.cleanButton = ISButton:new(
-        PAD, btnsY, actionW, btnH,
+        PAD, btnsY, halfW, btnH,
         getText("UI_clean"), self, AwardsWelcomeUI.onCleanClick)
     self:addChild(self.cleanButton)
 
     self.cleanLoserButton = ISButton:new(
-        PAD + actionW + PAD, btnsY, actionW, btnH,
+        PAD + halfW + PAD, btnsY, halfW, btnH,
         getText("UI_clean_loser"), self, AwardsWelcomeUI.onCleanLoserClick)
     self:addChild(self.cleanLoserButton)
 
-    -- Right group: Close (far right), Manage Awards (left of Close, admin only)
+    -- Row 2: close (left), manage (right — admin/SP only)
+    local row2Y = btnsY + btnH + PAD
     self.closeButton = ISButton:new(
-        self.width - PAD - closeW, btnsY, closeW, btnH,
+        PAD, row2Y, halfW, btnH,
         getText("UI_close"), self, AwardsWelcomeUI.onCloseClick)
     self:addChild(self.closeButton)
 
@@ -100,7 +99,7 @@ function AwardsWelcomeUI:create()
     local isSP = ok and sz ~= nil and sz <= 1
     if level == "admin" or level == "moderator" or isSP then
         self.manageButton = ISButton:new(
-            self.closeButton:getX() - PAD - manageW, btnsY, manageW, btnH,
+            PAD + halfW + PAD, row2Y, halfW, btnH,
             getText("UI_admin_manage"), self, AwardsWelcomeUI.onManageClick)
         self:addChild(self.manageButton)
     end
@@ -227,7 +226,7 @@ function CreateWelcomeWindow()
     local screenW = getCore():getScreenWidth()
     local screenH = getCore():getScreenHeight()
     local width   = 540
-    local height  = 400
+    local height  = 420
 
     awardsWelcomeWindow = AwardsWelcomeUI:new(
         (screenW - width) / 2 + 400,
