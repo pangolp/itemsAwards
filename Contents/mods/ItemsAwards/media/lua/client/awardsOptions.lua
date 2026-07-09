@@ -1,5 +1,5 @@
 --[[
-    ItemsAwards - Options Module (Build 41 / common)
+    ItemsAwards - Options Module (Build 41)
     Uses the ModOptions API available in B41.
 --]]
 
@@ -18,10 +18,6 @@ Awards.Options.showNumberWhenLosing = false
 Awards.Options.showMessageInChat    = false
 Awards.Options.limitWinningNumbers  = 1
 Awards.Options.limitLosingNumbers   = 1
-
--- On B42, ModOptions.lua (PZAPI.ModOptions) handles options instead.
--- Skip the legacy registration to avoid a duplicate options panel.
-if PZAPI and PZAPI.ModOptions then return end
 
 if ModOptions and ModOptions.getInstance then
 

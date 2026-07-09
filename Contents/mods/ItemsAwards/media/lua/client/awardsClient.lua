@@ -1,5 +1,5 @@
 --[[
-    ItemsAwards - Client Module (Build 41 + 42)
+    ItemsAwards - Client Module (Build 41)
 
     Responsibilities:
       - Listen for commands sent by the server via OnServerCommand.
