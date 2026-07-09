@@ -36,10 +36,13 @@ function AwardsWelcomeUI:prerender()
 end
 
 function AwardsWelcomeUI:create()
-    local btnWidth  = 100
-    local btnHeight = 25
+    local PAD     = 10
+    local btnH    = 25
+    local actionW = 120   -- Clean wins / Clean lost
+    local closeW  = 110
+    local manageW = 130
 
-    self.awardsList = ISScrollingListBox:new(10, 100, self.width - 20, 110)
+    self.awardsList = ISScrollingListBox:new(PAD, 100, self.width - PAD * 2, 110)
     self.awardsList:initialise()
     self.awardsList:instantiate()
     self.awardsList.itemheight   = 22
@@ -51,8 +54,8 @@ function AwardsWelcomeUI:create()
     self:addChild(self.awardsList)
 
     self.losersList = ISScrollingListBox:new(
-        10, self.awardsList:getY() + self.awardsList:getHeight() + 10,
-        self.width - 20, 110)
+        PAD, self.awardsList:getY() + self.awardsList:getHeight() + PAD,
+        self.width - PAD * 2, 110)
     self.losersList:initialise()
     self.losersList:instantiate()
     self.losersList.itemheight = 22
@@ -61,30 +64,32 @@ function AwardsWelcomeUI:create()
     self.losersList.doDrawItem = self.drawLoserItem
     self:addChild(self.losersList)
 
-    local btnsY = self.losersList:getY() + self.losersList:getHeight() + 10
+    local btnsY = self.losersList:getY() + self.losersList:getHeight() + PAD
 
-    self.closeButton = ISButton:new(
-        self.width - 490, btnsY, btnWidth, btnHeight,
-        getText("UI_close"), self, AwardsWelcomeUI.onCloseClick)
-    self:addChild(self.closeButton)
-
+    -- Left group: action buttons (clear lists)
     self.cleanButton = ISButton:new(
-        self.closeButton:getX() + btnWidth + 10, btnsY, btnWidth, btnHeight,
+        PAD, btnsY, actionW, btnH,
         getText("UI_clean"), self, AwardsWelcomeUI.onCleanClick)
     self:addChild(self.cleanButton)
 
     self.cleanLoserButton = ISButton:new(
-        self.cleanButton:getX() + btnWidth + 10, btnsY, btnWidth, btnHeight,
+        PAD + actionW + PAD, btnsY, actionW, btnH,
         getText("UI_clean_loser"), self, AwardsWelcomeUI.onCleanLoserClick)
     self:addChild(self.cleanLoserButton)
 
+    -- Right group: Close (far right), Manage Awards (left of Close, admin only)
+    self.closeButton = ISButton:new(
+        self.width - PAD - closeW, btnsY, closeW, btnH,
+        getText("UI_close"), self, AwardsWelcomeUI.onCloseClick)
+    self:addChild(self.closeButton)
+
     local p = getPlayer()
     local level = p and p:getAccessLevel() or ""
-    local online = getOnlinePlayers()
-    local isSP = online and online:size() <= 1
+    local ok, sz = pcall(function() return getOnlinePlayers():size() end)
+    local isSP = ok and sz ~= nil and sz <= 1
     if level == "admin" or level == "moderator" or isSP then
         self.manageButton = ISButton:new(
-            self.cleanLoserButton:getX() + btnWidth + 10, btnsY, btnWidth + 20, btnHeight,
+            self.closeButton:getX() - PAD - manageW, btnsY, manageW, btnH,
             getText("UI_admin_manage"), self, AwardsWelcomeUI.onManageClick)
         self:addChild(self.manageButton)
     end
@@ -204,8 +209,8 @@ function CreateWelcomeWindow()
 
     local screenW = getCore():getScreenWidth()
     local screenH = getCore():getScreenHeight()
-    local width   = 500
-    local height  = 380
+    local width   = 540
+    local height  = 400
 
     awardsWelcomeWindow = AwardsWelcomeUI:new(
         (screenW - width) / 2 + 400,

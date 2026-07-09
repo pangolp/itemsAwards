@@ -17,7 +17,7 @@ AwardsAdminUI          = ISPanel:derive("AwardsAdminUI")
 AwardsAdminUI.instance = nil
 
 local W       = 610
-local H       = 440
+local H       = 460
 local PAD     = 12
 local BTN_H   = 24
 local FIELD_H = 24
@@ -58,8 +58,17 @@ local function getItemTex(itemType)
     return tex
 end
 
--- In SP, isServer() and Awards.Data are both accessible in the same process.
--- sendClientCommand has no network to cross, so call Awards.Data directly.
+local function applyIcon(btn, tex)
+    if not tex then return end
+    local super = btn.render
+    function btn:render()
+        super(self)
+        local s  = self:getHeight() - 8
+        local iy = (self:getHeight() - s) * 0.5
+        self:drawTextureScaled(tex, 4, iy, s, s, 0.85, 1, 1, 1)
+    end
+end
+
 local function sendToServer(command, args)
     if isServer() and Awards and Awards.Data then
         local d = args or {}
@@ -88,7 +97,6 @@ local function sendToServer(command, args)
         elseif command == "reloadAwards" then
             Awards.Data.load()
         end
-        -- getAwards and anything unmatched above falls through to refresh
         if AwardsAdminUI.instance then
             local list = {}
             for i, v in ipairs(Awards.Data.getAll()) do
@@ -100,8 +108,6 @@ local function sendToServer(command, args)
         sendClientCommand(getPlayer(), "ItemsAwards", command, args or {})
     end
 end
-
--- ---- Public: called from awardsClient when server sends awardsList (MP) ----
 
 function AwardsAdminUI.onAwardsList(awards)
     if AwardsAdminUI.instance then
@@ -133,12 +139,14 @@ function AwardsAdminUI:initialise()
 end
 
 function AwardsAdminUI:buildUI()
-    local leftW  = COL_SEP - PAD * 2
-    local rightX = COL_SEP + PAD
-    local rightW = W - rightX - PAD
-    local shortW = 60
+    local leftW   = COL_SEP - PAD * 2
+    local rightX  = COL_SEP + PAD
+    local rightW  = W - rightX - PAD
+    local shortW  = 60
+    local LABEL_GAP = 4
+    local FIELD_GAP = 10
 
-    -- ===== LEFT COLUMN: list =====
+    -- ===== LEFT COLUMN =====
     local lY = 42
 
     self.list = ISScrollingListBox:new(PAD, lY, leftW, LIST_H)
@@ -151,72 +159,79 @@ function AwardsAdminUI:buildUI()
     self.list:setOnMouseDoubleClick(self, AwardsAdminUI.onRowDoubleClick)
     self:addChild(self.list)
 
-    local deleteY = lY + LIST_H + 8
-    self.deleteBtn = ISButton:new(PAD, deleteY, leftW, BTN_H,
+    self.deleteBtn = ISButton:new(PAD, lY + LIST_H + PAD, leftW, BTN_H,
         tx("UI_admin_delete"), self, AwardsAdminUI.onDeleteClick)
     self.deleteBtn:initialise()
     self.deleteBtn:instantiate()
     self:addChild(self.deleteBtn)
 
-    -- ===== RIGHT COLUMN: form =====
-    local fY = 42
+    -- ===== RIGHT COLUMN =====
+    local fY = lY
 
-    self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_item") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
-    fY = fY + 20
+    self:addChild(ISLabel:new(rightX, fY, FIELD_H,
+        tx("UI_admin_item") .. ":", 0.75, 0.85, 1, 1, UIFont.Small, true))
+    fY = fY + FIELD_H + LABEL_GAP
     self.itemEntry = ISTextEntryBox:new("", rightX, fY, rightW, FIELD_H)
     self.itemEntry:initialise()
     self.itemEntry:instantiate()
     self.itemEntry:setMaxLines(1)
     self:addChild(self.itemEntry)
-    fY = fY + FIELD_H + 10
+    fY = fY + FIELD_H + FIELD_GAP
 
-    self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_number") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
-    fY = fY + 20
+    self:addChild(ISLabel:new(rightX, fY, FIELD_H,
+        tx("UI_admin_number") .. ":", 0.75, 0.85, 1, 1, UIFont.Small, true))
+    fY = fY + FIELD_H + LABEL_GAP
     self.numberEntry = ISTextEntryBox:new("", rightX, fY, shortW, FIELD_H)
     self.numberEntry:initialise()
     self.numberEntry:instantiate()
     self.numberEntry:setMaxLines(1)
     self:addChild(self.numberEntry)
-    fY = fY + FIELD_H + 10
+    fY = fY + FIELD_H + FIELD_GAP
 
-    self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_count") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
-    fY = fY + 20
+    self:addChild(ISLabel:new(rightX, fY, FIELD_H,
+        tx("UI_admin_count") .. ":", 0.75, 0.85, 1, 1, UIFont.Small, true))
+    fY = fY + FIELD_H + LABEL_GAP
     self.countEntry = ISTextEntryBox:new("", rightX, fY, shortW, FIELD_H)
     self.countEntry:initialise()
     self.countEntry:instantiate()
     self.countEntry:setMaxLines(1)
     self:addChild(self.countEntry)
-    fY = fY + FIELD_H + 10
+    fY = fY + FIELD_H + FIELD_GAP
 
-    self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_zkills") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
-    fY = fY + 20
+    self:addChild(ISLabel:new(rightX, fY, FIELD_H,
+        tx("UI_admin_zkills") .. ":", 0.75, 0.85, 1, 1, UIFont.Small, true))
+    fY = fY + FIELD_H + LABEL_GAP
     self.zkillsEntry = ISTextEntryBox:new("", rightX, fY, shortW, FIELD_H)
     self.zkillsEntry:initialise()
     self.zkillsEntry:instantiate()
     self.zkillsEntry:setMaxLines(1)
     self:addChild(self.zkillsEntry)
-    fY = fY + FIELD_H + 10
+    fY = fY + FIELD_H + FIELD_GAP
 
-    self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_onZombie") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
-    fY = fY + 20
-    self.onZombieBtn = ISButton:new(rightX, fY, 70, BTN_H,
+    self:addChild(ISLabel:new(rightX, fY, FIELD_H,
+        tx("UI_admin_onZombie") .. ":", 0.75, 0.85, 1, 1, UIFont.Small, true))
+    fY = fY + FIELD_H + LABEL_GAP
+    self.onZombieBtn = ISButton:new(rightX, fY, 80, BTN_H,
         tx("UI_admin_no"), self, AwardsAdminUI.onToggleZombie)
     self.onZombieBtn:initialise()
     self.onZombieBtn:instantiate()
     self:addChild(self.onZombieBtn)
-    fY = fY + BTN_H + 14
+    fY = fY + BTN_H + FIELD_GAP * 2
 
-    self.addBtn = ISButton:new(rightX, fY, (rightW - 8) / 2, BTN_H,
+    local halfW = math.floor((rightW - PAD) / 2)
+    self.addBtn = ISButton:new(rightX, fY, halfW, BTN_H,
         tx("UI_admin_add"), self, AwardsAdminUI.onAddClick)
     self.addBtn:initialise()
     self.addBtn:instantiate()
     self:addChild(self.addBtn)
 
-    self.saveBtn = ISButton:new(rightX + (rightW - 8) / 2 + 8, fY, (rightW - 8) / 2, BTN_H,
+    self.saveBtn = ISButton:new(rightX + halfW + PAD, fY, halfW, BTN_H,
         tx("UI_admin_save"), self, AwardsAdminUI.onSaveClick)
     self.saveBtn:initialise()
     self.saveBtn:instantiate()
     self:addChild(self.saveBtn)
+
+    self._formEndY = fY + BTN_H
 
     -- ===== BOTTOM BAR =====
     local botY = H - BTN_H - PAD
@@ -232,14 +247,14 @@ function AwardsAdminUI:buildUI()
     self.closeBtn:instantiate()
     self:addChild(self.closeBtn)
 
-    -- Load icon textures (silently ignored if files are missing)
-    self._texAdd   = getTexture("media/ui/icons/add.png")
-    self._texEdit  = getTexture("media/ui/icons/edit.png")
-    self._texTrash = getTexture("media/ui/icons/trash-solid.png")
+    -- Icons (B41 only has gift; add/edit/trash may be absent — applyIcon handles nil)
+    local texAdd   = getTexture("media/ui/icons/add.png")
+    local texEdit  = getTexture("media/ui/icons/edit.png")
+    local texTrash = getTexture("media/ui/icons/trash-solid.png")
 
-    if self._texAdd   then self.addBtn.texture    = self._texAdd   end
-    if self._texEdit  then self.saveBtn.texture   = self._texEdit  end
-    if self._texTrash then self.deleteBtn.texture = self._texTrash end
+    applyIcon(self.addBtn,    texAdd)
+    applyIcon(self.saveBtn,   texEdit)
+    applyIcon(self.deleteBtn, texTrash)
 
     self:clearForm()
 end
@@ -255,24 +270,32 @@ function AwardsAdminUI:prerender()
     self:drawText(tx("UI_admin_list_header"), PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
     self:drawText(tx("UI_admin_form_header"), COL_SEP + PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
 
-    local sepTop = 26
-    local sepBot = H - BTN_H - PAD - 6
-    self:drawRect(COL_SEP, sepTop, 1, sepBot - sepTop, 0.6, 0.4, 0.4, 0.4)
-    self:drawRect(PAD, H - BTN_H - PAD - 6, W - PAD * 2, 1, 0.6, 0.4, 0.4, 0.4)
+    self:drawRect(COL_SEP, 26, 1, H - BTN_H - PAD - 6 - 26, 0.6, 0.4, 0.4, 0.4)
 
-    local rightX = COL_SEP + PAD
-    if self._editIndex then
-        self:drawText(tx("UI_admin_editing") .. " #" .. self._editIndex,
-            rightX, H - BTN_H - PAD - 30, 0.4, 1, 0.4, 1, UIFont.Small)
-    else
-        self:drawText(tx("UI_admin_hint_dblclick"),
-            rightX, H - BTN_H - PAD - 30, 0.5, 0.5, 0.5, 1, UIFont.Small)
-    end
+    local sepY = H - BTN_H - PAD - 8
+    self:drawRect(PAD, sepY, W - PAD * 2, 1, 0.6, 0.4, 0.4, 0.4)
 
-    if self._statusMsg then
-        local r = self._statusIsErr and 1   or 0.3
-        local g = self._statusIsErr and 0.3 or 1
-        self:drawText(self._statusMsg, rightX, H - BTN_H - PAD - 14, r, g, 0.3, 1, UIFont.Small)
+    local rightX     = COL_SEP + PAD
+    local statusTopY = (self._formEndY or 340) + 14
+    local statusBotY = sepY - 4
+
+    if statusTopY < statusBotY then
+        self:drawRect(rightX, statusTopY - 2, W - rightX - PAD, statusBotY - statusTopY + 4,
+            0.15, 0.1, 0.1, 0.12)
+
+        local hintText
+        if self._editIndex then
+            hintText = tx("UI_admin_editing") .. "  #" .. self._editIndex
+        else
+            hintText = tx("UI_admin_hint_dblclick")
+        end
+        self:drawText(hintText, rightX + 4, statusTopY, 0.55, 0.65, 0.75, 1, UIFont.Small)
+
+        if self._statusMsg then
+            local r = self._statusIsErr and 1   or 0.3
+            local g = self._statusIsErr and 0.3 or 1
+            self:drawText(self._statusMsg, rightX + 4, statusTopY + 18, r, g, 0.3, 1, UIFont.Small)
+        end
     end
 end
 
@@ -285,13 +308,13 @@ function AwardsAdminUI:drawRow(y, item, alt)
     end
     if item.item then
         local tex    = item.item.tex
-        local iconSz = self.itemheight - 4
+        local iconSz = self.itemheight - 6
         local textX  = 6
         if tex then
-            self:drawTextureScaled(tex, 2, y + 2, iconSz, iconSz, 1, 1, 1, 1)
-            textX = iconSz + 6
+            self:drawTextureScaled(tex, 3, y + 3, iconSz, iconSz, 1, 1, 1, 1)
+            textX = iconSz + 7
         end
-        self:drawText(item.text, textX, y + 4, 1, 1, 1, a, self.font)
+        self:drawText(item.text, textX, y + 5, 1, 1, 1, a, self.font)
     end
     return y + self.itemheight
 end
@@ -370,10 +393,10 @@ end
 function AwardsAdminUI:onRowDoubleClick()
     local idx = self.list.selected
     if not idx or idx <= 0 then return end
-    local listItem = self.list.items[idx]
-    if not listItem or not listItem.item then return end
-    self._editIndex = listItem.item.index
-    self:fillForm(listItem.item.data)
+    local li = self.list.items[idx]
+    if not li or not li.item then return end
+    self._editIndex = li.item.index
+    self:fillForm(li.item.data)
     self:setStatus(nil, false)
 end
 
@@ -420,8 +443,8 @@ function AwardsAdminUI:onDeleteClick()
             self:setStatus(tx("UI_admin_err_nosel"), true)
             return
         end
-        local listItem = self.list.items[selIdx]
-        if listItem and listItem.item then idx = listItem.item.index end
+        local li = self.list.items[selIdx]
+        if li and li.item then idx = li.item.index end
     end
     if not idx then
         self:setStatus(tx("UI_admin_err_nosel"), true)
@@ -452,7 +475,7 @@ function OpenAwardsAdminPanel()
     if AwardsAdminUI.instance then
         AwardsAdminUI.instance:setVisible(true)
         AwardsAdminUI.instance:addToUIManager()
-        sendToServer("getAwards", {})  -- only fetch current list, no file reload
+        sendToServer("getAwards", {})
         return
     end
     local sw = getCore():getScreenWidth()
@@ -461,5 +484,5 @@ function OpenAwardsAdminPanel()
     panel:initialise()
     panel:addToUIManager()
     AwardsAdminUI.instance = panel
-    sendToServer("getAwards", {})  -- only fetch current list, no file reload
+    sendToServer("getAwards", {})
 end
