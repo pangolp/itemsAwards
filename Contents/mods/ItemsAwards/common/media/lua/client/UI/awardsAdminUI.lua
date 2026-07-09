@@ -20,8 +20,8 @@ AwardsAdminUI          = ISPanel:derive("AwardsAdminUI")
 AwardsAdminUI.instance = nil
 
 local W        = 610
-local H        = 500
-local STATUS_H = 40
+local H        = 520
+local STATUS_H = 56
 local PAD      = 12
 local BTN_H    = 24
 local FIELD_H  = 24
@@ -324,11 +324,11 @@ function AwardsAdminUI:prerender()
 
     -- Title + column headers
     self:drawText(tx("UI_admin_panel_title"), PAD, PAD, 1, 1, 1, 1, UIFont.Medium)
-    self:drawText(tx("UI_admin_list_header"), PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
-    self:drawText(tx("UI_admin_form_header"), COL_SEP + PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
+    self:drawText(tx("UI_admin_list_header"), PAD, 36, 0.6, 0.8, 1, 1, UIFont.Small)
+    self:drawText(tx("UI_admin_form_header"), COL_SEP + PAD, 36, 0.6, 0.8, 1, 1, UIFont.Small)
 
     -- Vertical separator between columns
-    self:drawRect(COL_SEP, 26, 1, H - STATUS_H - BTN_H - PAD - 6 - 26, 0.6, 0.4, 0.4, 0.4)
+    self:drawRect(COL_SEP, 34, 1, H - STATUS_H - BTN_H - PAD - 6 - 34, 0.6, 0.4, 0.4, 0.4)
 
     -- Horizontal separator above bottom bar
     local sepY = H - STATUS_H - BTN_H - PAD - 8

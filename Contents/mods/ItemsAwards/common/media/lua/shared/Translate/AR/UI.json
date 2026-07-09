@@ -15,7 +15,7 @@
     "UI_admin_manage" : "Gestionar Premios",
     "UI_admin_panel_title" : "Gestor de Premios",
     "UI_admin_item" : "Tipo de ítem",
-    "UI_admin_number" : "Número (1-100)",
+    "UI_admin_number" : "Número",
     "UI_admin_count" : "Cantidad",
     "UI_admin_zkills" : "Kills mín.",
     "UI_admin_onZombie" : "En zombi",
@@ -35,5 +35,10 @@
     "UI_admin_deleted"     : "Premio eliminado.",
     "UI_admin_reloaded"    : "Lista recargada desde el archivo.",
     "UI_admin_editing"     : "Editando",
-    "UI_admin_hint_dblclick" : "Doble clic para editar un premio."
+    "UI_admin_hint_dblclick" : "Doble clic para editar un premio.",
+    "UI_admin_maxDice"        : "Dado máximo",
+    "UI_admin_set"            : "Aplicar",
+    "UI_admin_err_maxdice"    : "El valor debe ser 2 o mayor.",
+    "UI_admin_maxdice_set"    : "Dado máximo actualizado.",
+    "UI_admin_err_number_range" : "El número supera el dado máximo (%d)."
 }

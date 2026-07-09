@@ -15,7 +15,7 @@
     "UI_admin_manage" : "Manage Awards",
     "UI_admin_panel_title" : "Awards Manager",
     "UI_admin_item" : "Item type",
-    "UI_admin_number" : "Number (1-100)",
+    "UI_admin_number" : "Number",
     "UI_admin_count" : "Count",
     "UI_admin_zkills" : "Min. kills",
     "UI_admin_onZombie" : "On zombie",
@@ -35,5 +35,10 @@
     "UI_admin_deleted"     : "Award deleted.",
     "UI_admin_reloaded"    : "List reloaded from file.",
     "UI_admin_editing"     : "Editing",
-    "UI_admin_hint_dblclick" : "Double-click to edit an award."
+    "UI_admin_hint_dblclick" : "Double-click to edit an award.",
+    "UI_admin_maxDice"        : "Max dice",
+    "UI_admin_set"            : "Apply",
+    "UI_admin_err_maxdice"    : "Value must be 2 or higher.",
+    "UI_admin_maxdice_set"    : "Max dice updated.",
+    "UI_admin_err_number_range" : "Number exceeds max dice (%d)."
 }
