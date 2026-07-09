@@ -96,7 +96,7 @@ function AwardsAdminUI:createUI()
     local fY = listY + LIST_H + 14
 
     -- Item
-    self:addChild(ISLabel:new(x, fY + 3, FIELD_H, tx("UI_admin_item") .. ":", false, 1, 1, 1, 1, UIFont.Small, true))
+    self:addChild(ISLabel:new(x, fY + 3, FIELD_H, tx("UI_admin_item") .. ":", 1, 1, 1, 1, UIFont.Small, true))
     self.itemEntry = ISTextEntryBox:new("", entryX, fY, entryW, FIELD_H)
     self.itemEntry:initialise()
     self.itemEntry:instantiate()
@@ -109,21 +109,21 @@ function AwardsAdminUI:createUI()
     local col2 = x + labelW + 5 + shortW + 10
     local col3 = col2 + labelW + 5 + shortW + 10
 
-    self:addChild(ISLabel:new(x, fY + 3, labelW, tx("UI_admin_number") .. ":", false, 1, 1, 1, 1, UIFont.Small, true))
+    self:addChild(ISLabel:new(x, fY + 3, labelW, tx("UI_admin_number") .. ":", 1, 1, 1, 1, UIFont.Small, true))
     self.numberEntry = ISTextEntryBox:new("", x + labelW + 5, fY, shortW, FIELD_H)
     self.numberEntry:initialise()
     self.numberEntry:instantiate()
     self.numberEntry:setMaxLines(1)
     self:addChild(self.numberEntry)
 
-    self:addChild(ISLabel:new(col2, fY + 3, labelW, tx("UI_admin_count") .. ":", false, 1, 1, 1, 1, UIFont.Small, true))
+    self:addChild(ISLabel:new(col2, fY + 3, labelW, tx("UI_admin_count") .. ":", 1, 1, 1, 1, UIFont.Small, true))
     self.countEntry = ISTextEntryBox:new("", col2 + labelW + 5, fY, shortW, FIELD_H)
     self.countEntry:initialise()
     self.countEntry:instantiate()
     self.countEntry:setMaxLines(1)
     self:addChild(self.countEntry)
 
-    self:addChild(ISLabel:new(col3, fY + 3, labelW, tx("UI_admin_zkills") .. ":", false, 1, 1, 1, 1, UIFont.Small, true))
+    self:addChild(ISLabel:new(col3, fY + 3, labelW, tx("UI_admin_zkills") .. ":", 1, 1, 1, 1, UIFont.Small, true))
     self.zkillsEntry = ISTextEntryBox:new("", col3 + labelW + 5, fY, shortW, FIELD_H)
     self.zkillsEntry:initialise()
     self.zkillsEntry:instantiate()
@@ -132,7 +132,7 @@ function AwardsAdminUI:createUI()
     fY = fY + FIELD_H + 8
 
     -- On zombie toggle
-    self:addChild(ISLabel:new(x, fY + 3, labelW, tx("UI_admin_onZombie") .. ":", false, 1, 1, 1, 1, UIFont.Small, true))
+    self:addChild(ISLabel:new(x, fY + 3, labelW, tx("UI_admin_onZombie") .. ":", 1, 1, 1, 1, UIFont.Small, true))
     self.onZombieBtn = ISButton:new(x + labelW + 5, fY, 60, BTN_H, tx("UI_admin_no"), self, AwardsAdminUI.onToggleZombie)
     self.onZombieBtn:initialise()
     self.onZombieBtn:instantiate()
