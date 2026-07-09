@@ -4,8 +4,8 @@
     Exposes Awards.Data for other server modules to read and mutate prizes.
 --]]
 
-if not PZAPI then return end
-
+-- common/media/lua/server/ is only ever loaded by B42+.
+-- B41 reads media/ only, so no PZAPI guard is needed here.
 if isClient() and not isServer() then return end
 
 Awards = Awards or {}

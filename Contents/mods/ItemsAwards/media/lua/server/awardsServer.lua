@@ -57,9 +57,9 @@ end
 local function playerIsAdmin(player)
     local level = player:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    -- Single-player: only one player online
-    local online = getOnlinePlayers()
-    return online and online:size() == 1
+    -- SP fallback: only one player online (use <= 1 in case count is 0 briefly)
+    local ok, size = pcall(function() return getOnlinePlayers():size() end)
+    return ok and size ~= nil and size <= 1
 end
 
 local function sendAwardsList(player)

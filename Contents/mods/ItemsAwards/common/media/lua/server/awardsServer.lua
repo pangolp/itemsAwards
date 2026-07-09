@@ -11,10 +11,8 @@
     Awards table is managed by awardsData.lua (loaded before this file).
 --]]
 
--- Guard: B42 only. B41 may scan common/ subdirectories and reach this file.
-if not PZAPI then return end
-
--- Guard: only run in server context (includes single-player host)
+-- common/media/lua/server/ is only ever loaded by B42+.
+-- B41 reads media/ only, so no PZAPI guard is needed here.
 if isClient() and not isServer() then return end
 
 Awards = Awards or {}
@@ -57,8 +55,9 @@ end
 local function playerIsAdmin(player)
     local level = player:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    local online = getOnlinePlayers()
-    return online and online:size() == 1
+    -- SP fallback: only one player online (use <= 1 in case count is 0 briefly)
+    local ok, size = pcall(function() return getOnlinePlayers():size() end)
+    return ok and size ~= nil and size <= 1
 end
 
 local function sendAwardsList(player)
