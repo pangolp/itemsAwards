@@ -1,80 +1,85 @@
 # Items Awards
 
+[Español](README.es.md)
+
 ![20250424210041_1](https://github.com/user-attachments/assets/20568750-2f27-4635-8e4b-42f986b1a7c1)
 
-- The idea of ​​the mod is simple. Every time a person kills a zombie, a script is executed internally, which obtains a random number, currently between 1 and 500. If that number matches any of the winning prizes within the table, a message is displayed to the player and the item is left on the zombie's body (so the player has to search among the bodies).
+A Project Zomboid mod compatible with **Build 41** and **Build 42**. Every time a player kills a zombie, the server rolls a random number between 1 and 100. If it matches one of the configured prize numbers and the player has enough kills, they receive an item — either directly in their inventory or placed on the zombie's body for them to loot.
 
-In addition, we are actively working to improve the code and add new features. For example, we recently added two new features:
+All reward logic runs on the **server** (authoritative). The client only displays notifications and a history panel.
 
-- The ability to configure some options, thanks to the "options" mode.
-- A viewer with the history of items obtained during the session.
+## Features
 
-It's important to note that, for now, there are two options:
+- Configurable prize table (item, required kills, delivery method).
+- HUD icon that opens a session history of wins and losses.
+- The HUD icon is draggable and remembers its position between sessions.
+- Options panel to control notification style and list limits.
+- Chat or halo notification when a prize is won or lost.
 
-- View the losing dice
-- Change the format in which this message is displayed.
+## Options
 
-(But we'll probably add more later)
+| Option | Description |
+|---|---|
+| Show dice when losing | Display the losing roll number in the notification |
+| Show message in chat | Use chat bubble instead of halo note |
+| Winning entries limit | How many wins to keep in the history panel (5/10/15/20) |
+| Losing entries limit | How many losses to keep in the history panel (5/10/15/20) |
 
-Regarding the viewer, the history is currently maintained while the user is on the server.
+## Folder structure
 
-When the user leaves, disconnects, or loses connection, the history is reset.
+Build 41 reads directly from `media/` at the root. Build 42 uses a version-merge mechanism: it reads `common/` as the base layer, then `42/` for overrides. Both builds have **completely separate native code** — no compatibility shims.
 
 ```
-ItemsAwards/
-|-- Contents
-|   `-- mods
-|       `-- ItemsAwards
-|           |-- mod.info              (root copy, read directly by Build 41)
-|           |-- itemsAwards.png
-|           |-- media
-|           |   `-- lua
-|           |       |-- client
-|           |       |   |-- UI
-|           |       |   |   `-- awardsUI.lua
-|           |       |   |-- awardsClient.lua
-|           |       |   `-- awardsOptions.lua
-|           |       |-- server
-|           |       |   `-- awardsServer.lua
-|           |       `-- shared
-|           |           `-- Translate
-|           |               |-- AR / EN / ES (*.txt)
-|           |-- 42
-|           |   |-- itemsAwards.png
-|           |   |-- mod.info
-|           |   `-- media
-|           |       `-- lua
-|           |           |-- client
-|           |           |   |-- ModOptions.lua          (B42 override: PZAPI.ModOptions)
-|           |           |   `-- UI
-|           |           |       `-- awardsUI_b42patch.lua
-|           |           `-- shared
-|           |               `-- Translate (AR/EN/ES *.json)
-|           `-- common
-|               |-- itemsAwards.png
-|               |-- mod.info
-|               `-- media
-|                   |-- lua
-|                   |   |-- client
-|                   |   |   |-- UI
-|                   |   |   |   `-- awardsUI.lua
-|                   |   |   |-- awardsClient.lua
-|                   |   |   `-- awardsOptions.lua
-|                   |   |-- server
-|                   |   |   `-- awardsServer.lua
-|                   |   `-- shared
-|                   |       `-- Translate (AR/EN/ES *.txt)
-|                   `-- ui
-|                       `-- icons
-|                           `-- gift_regular_icon.png
-|-- README.md
-|-- preview.png
-`-- workshop.txt
+Contents/mods/ItemsAwards/
+|-- mod.info                    B41: root mod descriptor
+|-- itemsAwards.png
+|-- media/                      Build 41 only (native B41 code)
+|   `-- lua/
+|       |-- client/
+|       |   |-- UI/awardsUI.lua         (InventoryItemFactory texture API)
+|       |   |-- awardsClient.lua
+|       |   `-- awardsOptions.lua       (ModOptions legacy API)
+|       |-- server/
+|       |   `-- awardsServer.lua        (string.format + getText, %s/%d)
+|       `-- shared/Translate/
+|           `-- AR | EN | ES  (*.txt)
+|-- common/                     Build 42 only (native B42 code)
+|   |-- mod.info
+|   |-- itemsAwards.png
+|   `-- media/lua/
+|       |-- client/
+|       |   |-- UI/awardsUI.lua         (getScriptManager texture API)
+|       |   |-- awardsClient.lua
+|       |   `-- awardsOptions.lua       (PZAPI.ModOptions)
+|       |-- server/
+|       |   `-- awardsServer.lua        (variadic getText, %1/%2)
+|       `-- shared/Translate/
+|           `-- AR | EN | ES  (*.json)
+`-- 42/                         Build 42 marker only
+    |-- mod.info
+    `-- itemsAwards.png
 ```
 
-> The root copy (`mod.info` + `media/`) is what Build 41 reads directly. `common/` + `42/` is the same content plus B42-only overrides, used by Build 42's own version-merge mechanism. Keep root and `common/` in sync manually — there is no build step that does it for you.
+> If you edit a prize or add a translation key, do it in **both** `media/` (B41) and `common/` (B42). There is no sync step.
 
-#### External link
-* [Steam WorkShop](https://steamcommunity.com/sharedfiles/filedetails/?id=2911373802)
+## Customizing prizes
 
-Greetings.
+Open `awardsServer.lua` in both `media/lua/server/` and `common/lua/server/` and edit the `itemsAwards` table:
+
+```lua
+local itemsAwards = {
+    {Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false},
+}
+```
+
+| Field | Description |
+|---|---|
+| `Item` | Full item type string (e.g. `"Base.Axe"`) |
+| `Number` | The lucky roll (1–100). Only one entry can own each number. |
+| `Count` | How many copies to give |
+| `zkills` | Minimum zombie kills the player must have |
+| `onZombie` | `true` = item placed on zombie body; `false` = goes to inventory |
+
+## Links
+
+- [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2911373802)
