@@ -23,5 +23,7 @@ UI_AR = {
     UI_admin_delete = "Eliminar",
     UI_admin_reload = "Recargar",
     UI_admin_yes = "Sí",
-    UI_admin_no = "No"
+    UI_admin_no = "No",
+    UI_admin_list_header = "Premios actuales",
+    UI_admin_form_header = "Nuevo / Editar"
 }
