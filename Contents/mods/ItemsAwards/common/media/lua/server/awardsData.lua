@@ -118,10 +118,8 @@ function Awards.Data.remove(index)
     end
 end
 
--- ---- Boot & periodic reload ----
+-- ---- Boot ----
 
 Awards.Data.load()
-
-Events.EveryOneMinute.Add(Awards.Data.load)
 
 print("[ItemsAwards] Data module loaded (B42).")
