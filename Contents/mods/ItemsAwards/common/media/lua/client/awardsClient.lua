@@ -1,5 +1,5 @@
 --[[
-    ItemsAwards - Client Module (Build 41 + 42)
+    ItemsAwards - Client Module (Build 42)
 
     Responsibilities:
       - Listen for commands sent by the server via OnServerCommand.
@@ -10,6 +10,9 @@
 
     This file contains NO award logic whatsoever.
 --]]
+
+-- Guard: B42 only. B41 may scan common/ subdirectories and reach this file.
+if not PZAPI then return end
 
 -- Guard: skip on dedicated server (no client context)
 if isServer() and not isClient() then return end

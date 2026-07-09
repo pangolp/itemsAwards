@@ -1,5 +1,5 @@
 --[[
-    ItemsAwards - Server Module
+    ItemsAwards - Server Module (Build 42)
     Runs ONLY on the server (dedicated, host, or single-player).
 
     Flow:
@@ -7,17 +7,17 @@
       2. Server rolls the number and decides if the player wins.
       3. Server adds the item to the player's inventory.
       4. Server sends a command to the client so it can update the UI.
-
-    Compatible with Build 41 and Build 42.
 --]]
+
+-- Guard: B42 only. B41 may scan common/ subdirectories and reach this file.
+if not PZAPI then return end
 
 -- Guard: only run in server context (includes single-player host)
 if isClient() and not isServer() then return end
 
 Awards = Awards or {}
 
--- Guard: this file can end up loaded as more than one physical copy
--- (e.g. root + common/ paths on B41). Only register everything once.
+-- Guard: prevents double execution if this file is somehow loaded twice.
 if Awards._serverLoaded then return end
 Awards._serverLoaded = true
 
@@ -42,41 +42,12 @@ local itemsAwards = {
 local function giveItemToPlayer(player, itemType, count)
     local inv = player:getInventory()
     for i = 1, count do
-        local item = inv:AddItem(itemType)
-        if sendAddItemToContainer then
-            sendAddItemToContainer(inv, item)
-        end
+        inv:AddItem(itemType)
     end
 end
 
 local function giveItemToZombie(zombie, itemType, count)
     zombie:getInventory():AddItems(itemType, count)
-end
-
--- ============================================================
---  Version-safe getText wrapper
---  B41: string.format(getText(key), ...)
---  B42: getText(key, ...)  (variadic)
--- ============================================================
-local unpack = table.unpack or unpack
-
-local function safeGetText(key, ...)
-    local args = {...}
-    -- Try B42 variadic style first (getText substitutes %1, %2, ...)
-    -- If %s/%d placeholders are still present, B42-style substitution
-    -- didn't happen (B41 translations use %s/%d), so fall through.
-    local ok, result = pcall(getText, key, unpack(args))
-    if ok and result and result ~= key and not result:find("%%[sd]") then
-        return result
-    end
-    -- Fall back to B41 string.format style
-    ok, result = pcall(function()
-        return string.format(getText(key), unpack(args))
-    end)
-    if ok and result then
-        return result
-    end
-    return key
 end
 
 -- ============================================================
@@ -135,8 +106,8 @@ local function ZombKilled(zombie)
                     itemName = value.Item
                 end
 
-                local winMsg = safeGetText("IGUI_WonItem",    itemName, value.Count)
-                local uiMsg  = safeGetText("UI_awardMessage", itemName, value.Count)
+                local winMsg = getText("IGUI_WonItem",    itemName, value.Count)
+                local uiMsg  = getText("UI_awardMessage", itemName, value.Count)
 
                 notifyClient(attacker, "award", {
                     item     = value.Item,
@@ -147,7 +118,7 @@ local function ZombKilled(zombie)
 
             else
                 -- NOT ENOUGH KILLS
-                local needMsg = safeGetText("IGUI_YouNeedMoreKills", number, value.zkills)
+                local needMsg = getText("IGUI_YouNeedMoreKills", number, value.zkills)
                 notifyClient(attacker, "needKills", {
                     message = needMsg,
                 })
@@ -160,7 +131,7 @@ local function ZombKilled(zombie)
 
     if not won then
         -- LOSING ROLL
-        local loseMsg = safeGetText("IGUI_LoseItem", number)
+        local loseMsg = getText("IGUI_LoseItem", number)
         notifyClient(attacker, "loser", {
             message = loseMsg,
         })
@@ -175,4 +146,4 @@ local function OnClientCommand(module, command, player, args)
 end
 Events.OnClientCommand.Add(OnClientCommand)
 
-print("[ItemsAwards] Server module loaded.")
+print("[ItemsAwards] Server module loaded (B42).")
