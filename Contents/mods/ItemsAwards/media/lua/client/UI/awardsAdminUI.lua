@@ -21,8 +21,9 @@ local H       = 440
 local PAD     = 12
 local BTN_H   = 24
 local FIELD_H = 24
-local COL_SEP = 295   -- x where the right column starts
+local COL_SEP = 295
 local LIST_H  = 255
+local ROW_H   = 24
 
 -- ---- Helpers ----
 
@@ -33,12 +34,32 @@ local function localPlayerIsAdmin()
     if not p then return false end
     local level = p:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    local online = getOnlinePlayers()
-    return online and online:size() <= 1
+    local ok, size = pcall(function() return getOnlinePlayers():size() end)
+    return ok and size ~= nil and size <= 1
 end
 
--- In single-player, isServer() is true in the same process as the client.
--- sendClientCommand() has no network to cross, so we call Awards.Data directly.
+local function itemExists(itemType)
+    local ok, found = pcall(function()
+        local sm = getScriptManager()
+        return sm ~= nil and sm:getItem(itemType) ~= nil
+    end)
+    return ok and found == true
+end
+
+local function getItemTex(itemType)
+    local tex = nil
+    pcall(function()
+        local sm = getScriptManager()
+        if sm then
+            local s = sm:getItem(itemType)
+            if s then tex = s:getNormalTexture() end
+        end
+    end)
+    return tex
+end
+
+-- In SP, isServer() and Awards.Data are both accessible in the same process.
+-- sendClientCommand has no network to cross, so call Awards.Data directly.
 local function sendToServer(command, args)
     if isServer() and Awards and Awards.Data then
         local d = args or {}
@@ -67,7 +88,7 @@ local function sendToServer(command, args)
         elseif command == "reloadAwards" then
             Awards.Data.load()
         end
-        -- Refresh panel directly after any change
+        -- getAwards and anything unmatched above falls through to refresh
         if AwardsAdminUI.instance then
             local list = {}
             for i, v in ipairs(Awards.Data.getAll()) do
@@ -101,6 +122,8 @@ function AwardsAdminUI:new(x, y)
     o.moveWithMouse   = true
     o._editIndex      = nil
     o._onZombieValue  = false
+    o._statusMsg      = nil
+    o._statusIsErr    = false
     return o
 end
 
@@ -110,10 +133,9 @@ function AwardsAdminUI:initialise()
 end
 
 function AwardsAdminUI:buildUI()
-    local leftW  = COL_SEP - PAD * 2          -- 271
-    local rightX = COL_SEP + PAD              -- 307
-    local rightW = W - rightX - PAD           -- 291
-    local entryW = rightW                      -- full right column width for item entry
+    local leftW  = COL_SEP - PAD * 2
+    local rightX = COL_SEP + PAD
+    local rightW = W - rightX - PAD
     local shortW = 60
 
     -- ===== LEFT COLUMN: list =====
@@ -122,7 +144,7 @@ function AwardsAdminUI:buildUI()
     self.list = ISScrollingListBox:new(PAD, lY, leftW, LIST_H)
     self.list:initialise()
     self.list:instantiate()
-    self.list.itemheight   = 22
+    self.list.itemheight   = ROW_H
     self.list.selected     = 0
     self.list.font         = UIFont.NewSmall
     self.list.doDrawItem   = AwardsAdminUI.drawRow
@@ -139,7 +161,6 @@ function AwardsAdminUI:buildUI()
     -- ===== RIGHT COLUMN: form =====
     local fY = 42
 
-    -- Item type
     self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_item") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
     fY = fY + 20
     self.itemEntry = ISTextEntryBox:new("", rightX, fY, rightW, FIELD_H)
@@ -149,7 +170,6 @@ function AwardsAdminUI:buildUI()
     self:addChild(self.itemEntry)
     fY = fY + FIELD_H + 10
 
-    -- Number
     self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_number") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
     fY = fY + 20
     self.numberEntry = ISTextEntryBox:new("", rightX, fY, shortW, FIELD_H)
@@ -159,7 +179,6 @@ function AwardsAdminUI:buildUI()
     self:addChild(self.numberEntry)
     fY = fY + FIELD_H + 10
 
-    -- Count
     self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_count") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
     fY = fY + 20
     self.countEntry = ISTextEntryBox:new("", rightX, fY, shortW, FIELD_H)
@@ -169,7 +188,6 @@ function AwardsAdminUI:buildUI()
     self:addChild(self.countEntry)
     fY = fY + FIELD_H + 10
 
-    -- Min kills
     self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_zkills") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
     fY = fY + 20
     self.zkillsEntry = ISTextEntryBox:new("", rightX, fY, shortW, FIELD_H)
@@ -179,7 +197,6 @@ function AwardsAdminUI:buildUI()
     self:addChild(self.zkillsEntry)
     fY = fY + FIELD_H + 10
 
-    -- On zombie toggle
     self:addChild(ISLabel:new(rightX, fY, FIELD_H, tx("UI_admin_onZombie") .. ":", 0.8, 0.8, 0.8, 1, UIFont.Small, true))
     fY = fY + 20
     self.onZombieBtn = ISButton:new(rightX, fY, 70, BTN_H,
@@ -189,7 +206,6 @@ function AwardsAdminUI:buildUI()
     self:addChild(self.onZombieBtn)
     fY = fY + BTN_H + 14
 
-    -- Add / Save
     self.addBtn = ISButton:new(rightX, fY, (rightW - 8) / 2, BTN_H,
         tx("UI_admin_add"), self, AwardsAdminUI.onAddClick)
     self.addBtn:initialise()
@@ -216,6 +232,15 @@ function AwardsAdminUI:buildUI()
     self.closeBtn:instantiate()
     self:addChild(self.closeBtn)
 
+    -- Load icon textures (silently ignored if files are missing)
+    self._texAdd   = getTexture("media/ui/icons/add.png")
+    self._texEdit  = getTexture("media/ui/icons/edit.png")
+    self._texTrash = getTexture("media/ui/icons/trash-solid.png")
+
+    if self._texAdd   then self.addBtn.texture    = self._texAdd   end
+    if self._texEdit  then self.saveBtn.texture   = self._texEdit  end
+    if self._texTrash then self.deleteBtn.texture = self._texTrash end
+
     self:clearForm()
 end
 
@@ -226,24 +251,28 @@ end
 function AwardsAdminUI:prerender()
     ISPanel.prerender(self)
 
-    -- Title
     self:drawText(tx("UI_admin_panel_title"), PAD, PAD, 1, 1, 1, 1, UIFont.Medium)
-
-    -- Column headers
     self:drawText(tx("UI_admin_list_header"), PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
     self:drawText(tx("UI_admin_form_header"), COL_SEP + PAD, 28, 0.6, 0.8, 1, 1, UIFont.Small)
 
-    -- Vertical separator
-    local sepTop  = 26
-    local sepBot  = H - BTN_H - PAD - 6
+    local sepTop = 26
+    local sepBot = H - BTN_H - PAD - 6
     self:drawRect(COL_SEP, sepTop, 1, sepBot - sepTop, 0.6, 0.4, 0.4, 0.4)
-
-    -- Horizontal separator above bottom bar
     self:drawRect(PAD, H - BTN_H - PAD - 6, W - PAD * 2, 1, 0.6, 0.4, 0.4, 0.4)
 
-    -- Edit hint
+    local rightX = COL_SEP + PAD
     if self._editIndex then
-        self:drawText("# " .. self._editIndex, COL_SEP + PAD, H - BTN_H - PAD + 3, 0.5, 1, 0.5, 0.9, UIFont.Small)
+        self:drawText(tx("UI_admin_editing") .. " #" .. self._editIndex,
+            rightX, H - BTN_H - PAD - 30, 0.4, 1, 0.4, 1, UIFont.Small)
+    else
+        self:drawText(tx("UI_admin_hint_dblclick"),
+            rightX, H - BTN_H - PAD - 30, 0.5, 0.5, 0.5, 1, UIFont.Small)
+    end
+
+    if self._statusMsg then
+        local r = self._statusIsErr and 1   or 0.3
+        local g = self._statusIsErr and 0.3 or 1
+        self:drawText(self._statusMsg, rightX, H - BTN_H - PAD - 14, r, g, 0.3, 1, UIFont.Small)
     end
 end
 
@@ -255,7 +284,14 @@ function AwardsAdminUI:drawRow(y, item, alt)
         self:drawRect(0, y, self:getWidth(), self.itemheight - 1, 0.5, 0.1, 0.4, 0.7)
     end
     if item.item then
-        self:drawText(item.text, 6, y + 3, 1, 1, 1, a, self.font)
+        local tex    = item.item.tex
+        local iconSz = self.itemheight - 4
+        local textX  = 6
+        if tex then
+            self:drawTextureScaled(tex, 2, y + 2, iconSz, iconSz, 1, 1, 1, 1)
+            textX = iconSz + 6
+        end
+        self:drawText(item.text, textX, y + 4, 1, 1, 1, a, self.font)
     end
     return y + self.itemheight
 end
@@ -270,7 +306,8 @@ function AwardsAdminUI:refreshList(awards)
         local label = string.format("[%d] %s  x%d  kills>=%d  %s",
             e.Number, e.Item, e.Count, e.zkills,
             e.onZombie and "[Zombie]" or "[Inv]")
-        self.list:insertItem(i, label, {index = i, data = e})
+        local tex = getItemTex(e.Item)
+        self.list:insertItem(i, label, {index = i, data = e, tex = tex})
     end
 end
 
@@ -303,10 +340,10 @@ function AwardsAdminUI:readForm()
     local number = tonumber(self.numberEntry:getText())
     local count  = tonumber(self.countEntry:getText())
     local zkills = tonumber(self.zkillsEntry:getText())
-    if not item or item == ""               then return nil end
-    if not number or number < 1 or number > 100 then return nil end
-    if not count  or count  < 1             then return nil end
-    if not zkills or zkills < 0             then return nil end
+    if not item or item == ""                    then return nil end
+    if not number or number < 1 or number > 100  then return nil end
+    if not count  or count  < 1                  then return nil end
+    if not zkills or zkills < 0                  then return nil end
     return {
         Item     = item,
         Number   = math.floor(number),
@@ -314,6 +351,11 @@ function AwardsAdminUI:readForm()
         zkills   = math.floor(zkills),
         onZombie = self._onZombieValue,
     }
+end
+
+function AwardsAdminUI:setStatus(msg, isErr)
+    self._statusMsg   = msg
+    self._statusIsErr = isErr
 end
 
 -- ============================================================
@@ -332,21 +374,41 @@ function AwardsAdminUI:onRowDoubleClick()
     if not listItem or not listItem.item then return end
     self._editIndex = listItem.item.index
     self:fillForm(listItem.item.data)
+    self:setStatus(nil, false)
 end
 
 function AwardsAdminUI:onAddClick()
     local entry = self:readForm()
-    if not entry then return end
+    if not entry then
+        self:setStatus(tx("UI_admin_err_form"), true)
+        return
+    end
+    if not itemExists(entry.Item) then
+        self:setStatus(string.format(tx("UI_admin_err_item"), entry.Item), true)
+        return
+    end
     sendToServer("addAward", entry)
+    self:setStatus(tx("UI_admin_added"), false)
     self:clearForm()
 end
 
 function AwardsAdminUI:onSaveClick()
-    if not self._editIndex then return end
+    if not self._editIndex then
+        self:setStatus(tx("UI_admin_err_nosel"), true)
+        return
+    end
     local entry = self:readForm()
-    if not entry then return end
+    if not entry then
+        self:setStatus(tx("UI_admin_err_form"), true)
+        return
+    end
+    if not itemExists(entry.Item) then
+        self:setStatus(string.format(tx("UI_admin_err_item"), entry.Item), true)
+        return
+    end
     entry.index = self._editIndex
     sendToServer("updateAward", entry)
+    self:setStatus(tx("UI_admin_saved"), false)
     self:clearForm()
 end
 
@@ -354,17 +416,25 @@ function AwardsAdminUI:onDeleteClick()
     local idx = self._editIndex
     if not idx then
         local selIdx = self.list.selected
-        if not selIdx or selIdx <= 0 then return end
+        if not selIdx or selIdx <= 0 then
+            self:setStatus(tx("UI_admin_err_nosel"), true)
+            return
+        end
         local listItem = self.list.items[selIdx]
         if listItem and listItem.item then idx = listItem.item.index end
     end
-    if not idx then return end
+    if not idx then
+        self:setStatus(tx("UI_admin_err_nosel"), true)
+        return
+    end
     sendToServer("deleteAward", {index = idx})
+    self:setStatus(tx("UI_admin_deleted"), false)
     self:clearForm()
 end
 
 function AwardsAdminUI:onReloadClick()
     sendToServer("reloadAwards", {})
+    self:setStatus(tx("UI_admin_reloaded"), false)
 end
 
 function AwardsAdminUI:onCloseClick()
@@ -382,7 +452,7 @@ function OpenAwardsAdminPanel()
     if AwardsAdminUI.instance then
         AwardsAdminUI.instance:setVisible(true)
         AwardsAdminUI.instance:addToUIManager()
-        sendToServer("reloadAwards", {})
+        sendToServer("getAwards", {})  -- only fetch current list, no file reload
         return
     end
     local sw = getCore():getScreenWidth()
@@ -391,5 +461,5 @@ function OpenAwardsAdminPanel()
     panel:initialise()
     panel:addToUIManager()
     AwardsAdminUI.instance = panel
-    sendToServer("reloadAwards", {})
+    sendToServer("getAwards", {})  -- only fetch current list, no file reload
 end
