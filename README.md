@@ -4,26 +4,67 @@
 
 ![20250424210041_1](https://github.com/user-attachments/assets/20568750-2f27-4635-8e4b-42f986b1a7c1)
 
-A Project Zomboid mod compatible with **Build 41** and **Build 42**. Every time a player kills a zombie, the server rolls a random number between 1 and 100. If it matches one of the configured prize numbers and the player has enough kills, they receive an item — either directly in their inventory or placed on the zombie's body for them to loot.
+A Project Zomboid mod compatible with **Build 41** and **Build 42**. Every time a player kills a zombie, the server rolls a random number between 1 and a configurable maximum (default 100). If it matches one of the configured prize numbers and the player has enough kills, they receive an item — either directly in their inventory or placed on the zombie's body for them to loot.
 
 All reward logic runs on the **server** (authoritative). The client only displays notifications and a history panel.
 
 ## Features
 
-- Configurable prize table (item, required kills, delivery method).
+- Prize table managed entirely via the in-game **admin panel** — no file editing required.
+- **Configurable dice range**: admin can raise or lower the max roll value at any time.
+- **Server-side winner log** automatically records every win to a plain-text file for auditing.
 - HUD icon that opens a session history of wins and losses.
 - The HUD icon is draggable and remembers its position between sessions.
 - Options panel to control notification style and list limits.
 - Chat or halo notification when a prize is won or lost.
 
-## Options
+## Player options
 
 | Option | Description |
 |---|---|
 | Show dice when losing | Display the losing roll number in the notification |
 | Show message in chat | Use chat bubble instead of halo note |
-| Winning entries limit | How many wins to keep in the history panel (5/10/15/20) |
-| Losing entries limit | How many losses to keep in the history panel (5/10/15/20) |
+| Winning entries limit | How many wins to keep in the history panel (5 / 10 / 15 / 20) |
+| Losing entries limit | How many losses to keep in the history panel (5 / 10 / 15 / 20) |
+
+## Admin panel
+
+Accessible to admins and moderators (always visible in single-player) via the **Manage Awards** button in the HUD panel.
+
+### Award fields
+
+| Field | Description |
+|---|---|
+| Item type | Full item type string (e.g. `Base.Axe`) — validated against the game's script manager |
+| Number | The lucky roll (1 – max dice). Only one entry can own each number. |
+| Count | How many copies to give |
+| Min. kills | Minimum zombie kills the player must have before they can win |
+| On zombie | Yes = item placed on zombie body to loot; No = goes directly to inventory |
+
+### Configurable max dice
+
+The bottom bar of the admin panel shows the current max dice value. Change the number and click **Apply** to save immediately. The server stores this in `ItemsAwards_config.txt` and will use it for all future rolls. Adding or editing an award number greater than the current max is blocked with an error.
+
+## Winner log
+
+The server appends one line to `ItemsAwards_winners_log.txt` every time a player wins an item:
+
+```
+[2026-07-09 15:30:45] Player: JohnDoe               | Roll:  50/100 | Item: Base.Money                    x1   | Placement: Inventory    | Kills: 42 (min: 1)
+```
+
+The file is never overwritten — only appended. Copy it manually to examine it. Losers are not recorded.
+
+## Server-side data files
+
+All files live in `Zomboid/Lua/` (or the equivalent folder on a dedicated server):
+
+| File | Contents |
+|---|---|
+| `ItemsAwards_awards.txt` | Prize table CSV, edited via admin panel |
+| `ItemsAwards_config.txt` | Max dice setting |
+| `ItemsAwards_winners_log.txt` | Append-only winner log |
+| `ItemsAwards_hudButtonPos.txt` | HUD button position (per client) |
 
 ## Folder structure
 
@@ -34,51 +75,40 @@ Contents/mods/ItemsAwards/
 |-- mod.info                    B41: root mod descriptor
 |-- itemsAwards.png
 |-- media/                      Build 41 only (native B41 code)
-|   `-- lua/
-|       |-- client/
-|       |   |-- UI/awardsUI.lua         (InventoryItemFactory texture API)
-|       |   |-- awardsClient.lua
-|       |   `-- awardsOptions.lua       (ModOptions legacy API)
-|       |-- server/
-|       |   `-- awardsServer.lua        (string.format + getText, %s/%d)
-|       `-- shared/Translate/
-|           `-- AR | EN | ES  (*.txt)
+|   |-- lua/
+|   |   |-- client/
+|   |   |   |-- UI/awardsUI.lua         (player panel + HUD button)
+|   |   |   |-- UI/awardsAdminUI.lua    (admin CRUD panel)
+|   |   |   |-- awardsClient.lua
+|   |   |   `-- awardsOptions.lua       (ModOptions legacy API)
+|   |   |-- server/
+|   |   |   |-- awardsData.lua          (prize table + config persistence)
+|   |   |   `-- awardsServer.lua        (roll logic, commands)
+|   |   `-- shared/Translate/
+|   |       `-- AR | EN | ES  (*.txt)
+|   `-- ui/icons/               (button icons)
 |-- common/                     Build 42 only (native B42 code)
 |   |-- mod.info
 |   |-- itemsAwards.png
-|   `-- media/lua/
-|       |-- client/
-|       |   |-- UI/awardsUI.lua         (getScriptManager texture API)
-|       |   |-- awardsClient.lua
-|       |   `-- awardsOptions.lua       (PZAPI.ModOptions)
-|       |-- server/
-|       |   `-- awardsServer.lua        (variadic getText, %1/%2)
-|       `-- shared/Translate/
-|           `-- AR | EN | ES  (*.json)
+|   |-- media/
+|   |   |-- lua/
+|   |   |   |-- client/
+|   |   |   |   |-- UI/awardsUI.lua
+|   |   |   |   |-- UI/awardsAdminUI.lua
+|   |   |   |   |-- awardsClient.lua
+|   |   |   |   `-- awardsOptions.lua   (PZAPI.ModOptions)
+|   |   |   |-- server/
+|   |   |   |   |-- awardsData.lua
+|   |   |   |   `-- awardsServer.lua
+|   |   |   `-- shared/Translate/
+|   |   |       `-- AR | EN | ES  (*.txt)
+|   |   `-- ui/icons/
 `-- 42/                         Build 42 marker only
     |-- mod.info
     `-- itemsAwards.png
 ```
 
-> If you edit a prize or add a translation key, do it in **both** `media/` (B41) and `common/` (B42). There is no sync step.
-
-## Customizing prizes
-
-Open `awardsServer.lua` in both `media/lua/server/` and `common/lua/server/` and edit the `itemsAwards` table:
-
-```lua
-local itemsAwards = {
-    {Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false},
-}
-```
-
-| Field | Description |
-|---|---|
-| `Item` | Full item type string (e.g. `"Base.Axe"`) |
-| `Number` | The lucky roll (1–100). Only one entry can own each number. |
-| `Count` | How many copies to give |
-| `zkills` | Minimum zombie kills the player must have |
-| `onZombie` | `true` = item placed on zombie body; `false` = goes to inventory |
+> If you add a translation key, do it in **both** `media/shared/Translate/` (B41) and `common/media/lua/shared/Translate/` (B42 — not yet present, inherits from media). There is no sync step.
 
 ## Links
 
