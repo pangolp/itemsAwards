@@ -74,44 +74,62 @@ local function sendToServer(command, args)
         local d = args or {}
         if command == "addAward" then
             if d.Item and d.Number then
-                Awards.Data.add({
-                    Item     = tostring(d.Item),
-                    Number   = tonumber(d.Number) or 0,
-                    Count    = tonumber(d.Count)  or 1,
-                    zkills   = tonumber(d.zkills) or 1,
-                    onZombie = d.onZombie == true,
-                })
+                local n = tonumber(d.Number) or 0
+                if n >= 1 and n <= Awards.Data.getMaxDice() then
+                    Awards.Data.add({
+                        Item     = tostring(d.Item),
+                        Number   = n,
+                        Count    = tonumber(d.Count)  or 1,
+                        zkills   = tonumber(d.zkills) or 1,
+                        onZombie = d.onZombie == true,
+                    })
+                end
             end
         elseif command == "updateAward" then
             if d.index then
-                Awards.Data.update(tonumber(d.index), {
-                    Item     = tostring(d.Item),
-                    Number   = tonumber(d.Number) or 0,
-                    Count    = tonumber(d.Count)  or 1,
-                    zkills   = tonumber(d.zkills) or 1,
-                    onZombie = d.onZombie == true,
-                })
+                local n = tonumber(d.Number) or 0
+                if n >= 1 and n <= Awards.Data.getMaxDice() then
+                    Awards.Data.update(tonumber(d.index), {
+                        Item     = tostring(d.Item),
+                        Number   = n,
+                        Count    = tonumber(d.Count)  or 1,
+                        zkills   = tonumber(d.zkills) or 1,
+                        onZombie = d.onZombie == true,
+                    })
+                end
             end
         elseif command == "deleteAward" then
             if d.index then Awards.Data.remove(tonumber(d.index)) end
         elseif command == "reloadAwards" then
             Awards.Data.load()
+        elseif command == "setMaxDice" then
+            Awards.Data.setMaxDice(tonumber(d.value))
         end
         if AwardsAdminUI.instance then
+            local inst = AwardsAdminUI.instance
             local list = {}
             for i, v in ipairs(Awards.Data.getAll()) do
                 list[i] = {Item=v.Item, Number=v.Number, Count=v.Count, zkills=v.zkills, onZombie=v.onZombie}
             end
-            AwardsAdminUI.instance:refreshList(list)
+            inst:refreshList(list)
+            inst._maxDice = Awards.Data.getMaxDice()
+            if inst.maxDiceEntry then
+                inst.maxDiceEntry:setText(tostring(inst._maxDice))
+            end
         end
     else
         sendClientCommand(getPlayer(), "ItemsAwards", command, args or {})
     end
 end
 
-function AwardsAdminUI.onAwardsList(awards)
+function AwardsAdminUI.onAwardsList(awards, maxDice)
     if AwardsAdminUI.instance then
-        AwardsAdminUI.instance:refreshList(awards)
+        local inst = AwardsAdminUI.instance
+        inst._maxDice = maxDice or 100
+        if inst.maxDiceEntry then
+            inst.maxDiceEntry:setText(tostring(inst._maxDice))
+        end
+        inst:refreshList(awards)
     end
 end
 
@@ -130,6 +148,7 @@ function AwardsAdminUI:new(x, y)
     o._onZombieValue  = false
     o._statusMsg      = nil
     o._statusIsErr    = false
+    o._maxDice        = 100
     return o
 end
 
@@ -235,11 +254,27 @@ function AwardsAdminUI:buildUI()
 
     -- ===== BOTTOM BAR =====
     local botY = H - BTN_H - PAD
-    self.reloadBtn = ISButton:new(PAD, botY, 160, BTN_H,
+    self.reloadBtn = ISButton:new(PAD, botY, 120, BTN_H,
         tx("UI_admin_reload"), self, AwardsAdminUI.onReloadClick)
     self.reloadBtn:initialise()
     self.reloadBtn:instantiate()
     self:addChild(self.reloadBtn)
+
+    -- Max dice control
+    local diceX = PAD + 130
+    self:addChild(ISLabel:new(diceX, botY + 4, FIELD_H,
+        tx("UI_admin_maxDice") .. ":", 0.75, 0.85, 1, 1, UIFont.Small, true))
+    self.maxDiceEntry = ISTextEntryBox:new("", diceX + 88, botY, 55, BTN_H)
+    self.maxDiceEntry:initialise()
+    self.maxDiceEntry:instantiate()
+    self.maxDiceEntry:setMaxLines(1)
+    self.maxDiceEntry:setText(tostring(self._maxDice or 100))
+    self:addChild(self.maxDiceEntry)
+    self.maxDiceSetBtn = ISButton:new(diceX + 148, botY, 70, BTN_H,
+        tx("UI_admin_set"), self, AwardsAdminUI.onSetMaxDice)
+    self.maxDiceSetBtn:initialise()
+    self.maxDiceSetBtn:instantiate()
+    self:addChild(self.maxDiceSetBtn)
 
     self.closeBtn = ISButton:new(W - PAD - 100, botY, 100, BTN_H,
         tx("UI_close"), self, AwardsAdminUI.onCloseClick)
@@ -363,10 +398,11 @@ function AwardsAdminUI:readForm()
     local number = tonumber(self.numberEntry:getText())
     local count  = tonumber(self.countEntry:getText())
     local zkills = tonumber(self.zkillsEntry:getText())
-    if not item or item == ""                    then return nil end
-    if not number or number < 1 or number > 100  then return nil end
-    if not count  or count  < 1                  then return nil end
-    if not zkills or zkills < 0                  then return nil end
+    local maxDice = self._maxDice or 100
+    if not item or item == ""                         then return nil end
+    if not number or number < 1 or number > maxDice   then return nil end
+    if not count  or count  < 1                       then return nil end
+    if not zkills or zkills < 0                       then return nil end
     return {
         Item     = item,
         Number   = math.floor(number),
@@ -403,7 +439,13 @@ end
 function AwardsAdminUI:onAddClick()
     local entry = self:readForm()
     if not entry then
-        self:setStatus(tx("UI_admin_err_form"), true)
+        local n = tonumber(self.numberEntry:getText())
+        local maxDice = self._maxDice or 100
+        if n and (n < 1 or n > maxDice) then
+            self:setStatus(string.format(tx("UI_admin_err_number_range"), maxDice), true)
+        else
+            self:setStatus(tx("UI_admin_err_form"), true)
+        end
         return
     end
     if not itemExists(entry.Item) then
@@ -422,7 +464,13 @@ function AwardsAdminUI:onSaveClick()
     end
     local entry = self:readForm()
     if not entry then
-        self:setStatus(tx("UI_admin_err_form"), true)
+        local n = tonumber(self.numberEntry:getText())
+        local maxDice = self._maxDice or 100
+        if n and (n < 1 or n > maxDice) then
+            self:setStatus(string.format(tx("UI_admin_err_number_range"), maxDice), true)
+        else
+            self:setStatus(tx("UI_admin_err_form"), true)
+        end
         return
     end
     if not itemExists(entry.Item) then
@@ -433,6 +481,16 @@ function AwardsAdminUI:onSaveClick()
     sendToServer("updateAward", entry)
     self:setStatus(tx("UI_admin_saved"), false)
     self:clearForm()
+end
+
+function AwardsAdminUI:onSetMaxDice()
+    local n = tonumber(self.maxDiceEntry:getText())
+    if not n or n < 2 then
+        self:setStatus(tx("UI_admin_err_maxdice"), true)
+        return
+    end
+    sendToServer("setMaxDice", {value = math.floor(n)})
+    self:setStatus(tx("UI_admin_maxdice_set"), false)
 end
 
 function AwardsAdminUI:onDeleteClick()

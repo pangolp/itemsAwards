@@ -16,8 +16,38 @@ Awards._dataLoaded = true
 Awards.Data = Awards.Data or {}
 
 local AWARDS_FILE = "ItemsAwards_awards.txt"
+local CONFIG_FILE = "ItemsAwards_config.txt"
 
-local _awards = {}
+local _awards  = {}
+local _maxDice = 100
+
+-- ---- Config ----
+
+function Awards.Data.getMaxDice()
+    return _maxDice
+end
+
+function Awards.Data.setMaxDice(n)
+    n = math.max(2, math.floor(tonumber(n) or 100))
+    _maxDice = n
+    local writer = getFileWriter(CONFIG_FILE, true, false)
+    if writer then
+        writer:write("maxDice=" .. n .. "\n")
+        writer:close()
+    end
+end
+
+local function loadConfig()
+    local reader = getFileReader(CONFIG_FILE, true)
+    if not reader then return end
+    local line = reader:readLine()
+    while line do
+        local v = line:match("^maxDice=(%d+)")
+        if v then _maxDice = math.max(2, tonumber(v) or 100) end
+        line = reader:readLine()
+    end
+    reader:close()
+end
 
 local DEFAULT_AWARDS = {
     {Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false},
@@ -120,6 +150,7 @@ end
 
 -- ---- Boot ----
 
+loadConfig()
 Awards.Data.load()
 
 print("[ItemsAwards] Data module loaded (B42).")

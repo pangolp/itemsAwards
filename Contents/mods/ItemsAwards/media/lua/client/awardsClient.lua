@@ -87,7 +87,7 @@ function Awards.Client.onServerCommand(command, args)
 
     elseif command == "awardsList" then
         if AwardsAdminUI and AwardsAdminUI.onAwardsList then
-            AwardsAdminUI.onAwardsList(args.awards or {})
+            AwardsAdminUI.onAwardsList(args.awards or {}, args.maxDice or 100)
         end
     end
 end

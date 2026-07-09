@@ -85,7 +85,7 @@ local function sendAwardsList(player)
     for i, v in ipairs(Awards.Data.getAll()) do
         list[i] = {Item = v.Item, Number = v.Number, Count = v.Count, zkills = v.zkills, onZombie = v.onZombie}
     end
-    notifyClient(player, "awardsList", {awards = list})
+    notifyClient(player, "awardsList", {awards = list, maxDice = Awards.Data.getMaxDice()})
 end
 
 -- ============================================================
@@ -104,7 +104,7 @@ local function ZombKilled(zombie)
         return
     end
 
-    local number          = ZombRandBetween(1, 101)
+    local number          = ZombRandBetween(1, Awards.Data.getMaxDice() + 1)
     local countZombieKill = attacker:getZombieKills() + 1
     local won             = false
 
@@ -162,9 +162,11 @@ local function OnClientCommand(module, command, player, args)
 
     elseif command == "addAward" then
         if not args or not args.Item or not args.Number then return end
+        local n = tonumber(args.Number) or 0
+        if n < 1 or n > Awards.Data.getMaxDice() then return end
         Awards.Data.add({
             Item     = tostring(args.Item),
-            Number   = tonumber(args.Number) or 0,
+            Number   = n,
             Count    = tonumber(args.Count)  or 1,
             zkills   = tonumber(args.zkills) or 1,
             onZombie = args.onZombie == true,
@@ -173,9 +175,11 @@ local function OnClientCommand(module, command, player, args)
 
     elseif command == "updateAward" then
         if not args or not args.index then return end
+        local n = tonumber(args.Number) or 0
+        if n < 1 or n > Awards.Data.getMaxDice() then return end
         Awards.Data.update(tonumber(args.index), {
             Item     = tostring(args.Item),
-            Number   = tonumber(args.Number) or 0,
+            Number   = n,
             Count    = tonumber(args.Count)  or 1,
             zkills   = tonumber(args.zkills) or 1,
             onZombie = args.onZombie == true,
@@ -189,6 +193,11 @@ local function OnClientCommand(module, command, player, args)
 
     elseif command == "reloadAwards" then
         Awards.Data.load()
+        sendAwardsList(player)
+
+    elseif command == "setMaxDice" then
+        if not args or not args.value then return end
+        Awards.Data.setMaxDice(tonumber(args.value))
         sendAwardsList(player)
     end
 end
