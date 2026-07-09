@@ -52,6 +52,24 @@ local function notifyClient(player, cmd, args)
 end
 
 -- ============================================================
+--  Log: append one line per winning roll to the server log file
+-- ============================================================
+local LOG_FILE = "ItemsAwards_winners_log.txt"
+
+local function logAward(player, roll, item, count, onZombie, kills, minKills)
+    local writer = getFileWriter(LOG_FILE, true, true)
+    if not writer then return end
+    local ts        = os.date and os.date("%Y-%m-%d %H:%M:%S") or "unknown"
+    local username  = player:getUsername() or "unknown"
+    local placement = onZombie and "ZombieBody" or "Inventory"
+    writer:write(string.format(
+        "[%s] Player: %-20s | Roll: %3d/100 | Item: %-30s x%-3d | Placement: %-12s | Kills: %d (min: %d)\n",
+        ts, username, roll, item, count, placement, kills, minKills
+    ))
+    writer:close()
+end
+
+-- ============================================================
 --  Admin helpers
 -- ============================================================
 local function playerIsAdmin(player)
@@ -100,6 +118,8 @@ local function ZombKilled(zombie)
                 else
                     giveItemToPlayer(attacker, value.Item, value.Count)
                 end
+
+                logAward(attacker, number, value.Item, value.Count, value.onZombie, countZombieKill, value.zkills)
 
                 local itemName = getItemNameFromFullType and getItemNameFromFullType(value.Item) or value.Item
 
