@@ -84,6 +84,11 @@ function Awards.Client.onServerCommand(command, args)
         if AddLoserMessageToUI then
             AddLoserMessageToUI(args.message)
         end
+
+    elseif command == "awardsList" then
+        if AwardsAdminUI and AwardsAdminUI.onAwardsList then
+            AwardsAdminUI.onAwardsList(args.awards or {}, args.maxDice or 100)
+        end
     end
 end
 
@@ -97,4 +102,4 @@ end
 
 Events.OnServerCommand.Add(OnServerCommand)
 
-print("[ItemsAwards] Client module loaded.")
+print("[ItemsAwards] Client module loaded (B41).")
