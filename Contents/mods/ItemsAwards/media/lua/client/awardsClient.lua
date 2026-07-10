@@ -63,12 +63,15 @@ function Awards.Client.onServerCommand(command, args)
     if not args then return end
 
     if command == "award" then
-        showMessage(args.message, false)
+        local placement = getText(args.onZombie and "IGUI_PlacementZombie" or "IGUI_PlacementInventory")
+        local msg   = args.message .. " " .. placement
+        local uiMsg = (args.uiMsg or args.message) .. " " .. placement
+        showMessage(msg, false)
         if AddAwardsLogMessage then
-            AddAwardsLogMessage(args.uiMsg or args.message)
+            AddAwardsLogMessage(uiMsg)
         end
         if AddAwardMessageToUI then
-            AddAwardMessageToUI(args.item, args.uiMsg or args.message)
+            AddAwardMessageToUI(args.item, uiMsg)
         end
 
     elseif command == "needKills" then
