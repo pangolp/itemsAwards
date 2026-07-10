@@ -4,3 +4,7 @@ id=ItemsAwards
 description=Rewards the player with items when eliminating a zombie. Compatible with Build 41 and 42. Server-authoritative: all reward logic runs on the server.
 require=modoptions,mod-translate
 author=pangolp
+url=https://steamcommunity.com/sharedfiles/filedetails/?id=2911373802
+modversion=1.5.0
+pzversion=42.0
+tags=Multiplayer,Items,Build 41,Build 42
