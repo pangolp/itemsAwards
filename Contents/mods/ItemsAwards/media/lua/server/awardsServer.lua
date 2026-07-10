@@ -54,17 +54,17 @@ end
 -- ============================================================
 --  Log: append one line per winning roll to the server log file
 -- ============================================================
-local LOG_FILE = "ItemsAwards_winners_log.txt"
-
-local function logAward(player, roll, item, count, onZombie, kills, minKills)
-    local writer = getFileWriter(LOG_FILE, true, true)
+local function logAward(player, roll, maxDice, item, count, onZombie, kills, minKills)
+    local date      = os.date and os.date("%Y_%m_%d") or "unknown"
+    local writer    = getFileWriter("ItemsAwards/" .. date .. "__winners_log.txt", true, true)
     if not writer then return end
     local ts        = os.date and os.date("%Y-%m-%d %H:%M:%S") or "unknown"
     local username  = player:getUsername() or "unknown"
-    local placement = onZombie and "ZombieBody" or "Inventory"
+    local steamid   = tostring(player:getSteamID() or "local")
+    local placement = onZombie and "zombie" or "player"
     writer:write(string.format(
-        "[%s] Player: %-20s | Roll: %3d/100 | Item: %-30s x%-3d | Placement: %-12s | Kills: %d (min: %d)\n",
-        ts, username, roll, item, count, placement, kills, minKills
+        "[%s] | %s | %s | %d/%d | %s | x%d | %s | %d | %d\n",
+        ts, username, steamid, roll, maxDice, item, count, placement, kills, minKills
     ))
     writer:close()
 end
@@ -120,7 +120,7 @@ local function ZombKilled(zombie)
                     giveItemToPlayer(attacker, value.Item, value.Count)
                 end
 
-                logAward(attacker, number, value.Item, value.Count, value.onZombie, countZombieKill, value.zkills)
+                logAward(attacker, number, Awards.Data.getMaxDice(), value.Item, value.Count, value.onZombie, countZombieKill, value.zkills)
 
                 local itemName = getItemNameFromFullType and getItemNameFromFullType(value.Item) or value.Item
 
