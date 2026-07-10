@@ -75,9 +75,10 @@ end
 local function playerIsAdmin(player)
     local level = player:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    -- SP fallback: only one player online (use <= 1 in case count is 0 briefly)
-    local ok, size = pcall(function() return getOnlinePlayers():size() end)
-    return ok and size ~= nil and size <= 1
+    -- SP fallback: in B41, getOnlinePlayers() returns nil in SP context
+    local players = getOnlinePlayers()
+    if players == nil then return true end
+    return players:size() <= 1
 end
 
 local function sendAwardsList(player)

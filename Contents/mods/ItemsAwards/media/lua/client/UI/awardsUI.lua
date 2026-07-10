@@ -92,8 +92,7 @@ function AwardsWelcomeUI:create()
 
     local p = getPlayer()
     local level = p and p:getAccessLevel() or ""
-    local ok, sz = pcall(function() return getOnlinePlayers():size() end)
-    local isSP = ok and sz ~= nil and sz <= 1
+    local isSP = not isClient()
     if level == "admin" or level == "moderator" or isSP then
         self.manageButton = ISButton:new(
             PAD + halfW + PAD, row2Y, halfW, btnH,

@@ -35,8 +35,7 @@ local function localPlayerIsAdmin()
     if not p then return false end
     local level = p:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    local ok, size = pcall(function() return getOnlinePlayers():size() end)
-    return ok and size ~= nil and size <= 1
+    return not isClient()
 end
 
 local function itemExists(itemType)
