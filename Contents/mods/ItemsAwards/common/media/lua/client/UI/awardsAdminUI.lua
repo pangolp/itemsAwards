@@ -34,12 +34,14 @@ local ROW_H    = 24
 local function tx(key) return getText(key) end
 
 local function localPlayerIsAdmin()
+    -- SP: not isClient() and not isServer() => not isClient() is true
+    -- Coop host: isServer()=true
+    if not isClient() or isServer() then return true end
+    -- Coop non-host / dedicated MP: check access level
     local p = getPlayer()
     if not p then return false end
     local level = p:getAccessLevel()
-    if level == "admin" or level == "moderator" then return true end
-    local ok, size = pcall(function() return getOnlinePlayers():size() end)
-    return ok and size ~= nil and size <= 1
+    return level == "admin" or level == "moderator"
 end
 
 local function itemExists(itemType)
@@ -75,9 +77,8 @@ local function applyIcon(btn, tex)
     end
 end
 
--- In SP, isServer() and Awards.Data are both accessible in the same process.
 local function sendToServer(command, args)
-    if isServer() and Awards and Awards.Data then
+    if (not isClient() or isServer()) and Awards and Awards.Data then
         local d = args or {}
         if command == "addAward" then
             if d.Item and d.Number then

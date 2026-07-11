@@ -73,9 +73,14 @@ end
 local function playerIsAdmin(player)
     local level = player:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    -- SP fallback: only one player online (use <= 1 in case count is 0 briefly)
-    local ok, size = pcall(function() return getOnlinePlayers():size() end)
-    return ok and size ~= nil and size <= 1
+    -- SP: not isClient() and not isServer(); no access levels, player is always admin
+    if not isClient() and not isServer() then return true end
+    -- Coop host: isServer()=true AND isClient()=true; identify by local player
+    if isClient() then
+        local localPlayer = getPlayer and getPlayer()
+        return localPlayer ~= nil and localPlayer == player
+    end
+    return false
 end
 
 local function sendAwardsList(player)
