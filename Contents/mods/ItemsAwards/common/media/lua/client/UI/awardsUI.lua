@@ -93,11 +93,13 @@ function AwardsWelcomeUI:create()
         getText("UI_close"), self, AwardsWelcomeUI.onCloseClick)
     self:addChild(self.closeButton)
 
-    local p = getPlayer()
-    local level = p and p:getAccessLevel() or ""
-    local ok, sz = pcall(function() return getOnlinePlayers():size() end)
-    local isSP = ok and sz ~= nil and sz <= 1
-    if level == "admin" or level == "moderator" or isSP then
+    local showManage = not isClient() or isServer()
+    if not showManage then
+        local p = getPlayer()
+        local level = p and p:getAccessLevel() or ""
+        showManage = level == "admin" or level == "moderator"
+    end
+    if showManage then
         self.manageButton = ISButton:new(
             PAD + halfW + PAD, row2Y, halfW, btnH,
             getText("UI_admin_manage"), self, AwardsWelcomeUI.onManageClick)
@@ -362,8 +364,8 @@ local function createHUDButton()
     local maxX = getCore():getScreenWidth()  - btnSize
     local maxY = getCore():getScreenHeight() - btnSize
     local savedX, savedY = loadHUDButtonPosition()
-    local x = clamp(savedX or 10, 0, maxX)
-    local y = clamp(savedY or 10, 0, maxY)
+    local x = clamp(savedX or 18, 0, maxX)
+    local y = clamp(savedY or 698, 0, maxY)
 
     -- No anchors: the button is positioned/persisted manually via drag,
     -- and anchoring it to an edge fights setX()/setY() while dragging.

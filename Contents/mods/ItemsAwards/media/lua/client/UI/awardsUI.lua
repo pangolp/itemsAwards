@@ -357,8 +357,8 @@ local function createHUDButton()
     local maxX = getCore():getScreenWidth()  - btnSize
     local maxY = getCore():getScreenHeight() - btnSize
     local savedX, savedY = loadHUDButtonPosition()
-    local x = clamp(savedX or 10, 0, maxX)
-    local y = clamp(savedY or 10, 0, maxY)
+    local x = clamp(savedX or 18, 0, maxX)
+    local y = clamp(savedY or 698, 0, maxY)
 
     -- No anchors: the button is positioned/persisted manually via drag,
     -- and anchoring it to an edge fights setX()/setY() while dragging.
