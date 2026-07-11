@@ -75,10 +75,14 @@ end
 local function playerIsAdmin(player)
     local level = player:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    -- SP fallback: in B41, getOnlinePlayers() returns nil in SP context
-    local players = getOnlinePlayers()
-    if players == nil then return true end
-    return players:size() <= 1
+    -- B41 SP: getOnlinePlayers() returns nil (no network stack)
+    if getOnlinePlayers() == nil then return true end
+    -- Coop host: isClient()=true, server and client share the same process
+    if isClient() then
+        local localPlayer = getPlayer and getPlayer()
+        return localPlayer ~= nil and localPlayer == player
+    end
+    return false
 end
 
 local function sendAwardsList(player)

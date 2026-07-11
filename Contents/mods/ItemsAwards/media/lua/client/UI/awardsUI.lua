@@ -90,10 +90,13 @@ function AwardsWelcomeUI:create()
         getText("UI_close"), self, AwardsWelcomeUI.onCloseClick)
     self:addChild(self.closeButton)
 
-    local p = getPlayer()
-    local level = p and p:getAccessLevel() or ""
-    local isSP = not isClient()
-    if level == "admin" or level == "moderator" or isSP then
+    local showManage = not isClient() or isServer()
+    if not showManage then
+        local p = getPlayer()
+        local level = p and p:getAccessLevel() or ""
+        showManage = level == "admin" or level == "moderator"
+    end
+    if showManage then
         self.manageButton = ISButton:new(
             PAD + halfW + PAD, row2Y, halfW, btnH,
             getText("UI_admin_manage"), self, AwardsWelcomeUI.onManageClick)

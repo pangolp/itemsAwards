@@ -31,11 +31,12 @@ local ROW_H    = 24
 local function tx(key) return getText(key) end
 
 local function localPlayerIsAdmin()
+    -- SP: not isClient() is true; coop host: isServer() is true
+    if not isClient() or isServer() then return true end
     local p = getPlayer()
     if not p then return false end
     local level = p:getAccessLevel()
-    if level == "admin" or level == "moderator" then return true end
-    return not isClient()
+    return level == "admin" or level == "moderator"
 end
 
 local function itemExists(itemType)
