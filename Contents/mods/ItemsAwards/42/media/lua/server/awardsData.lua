@@ -38,7 +38,7 @@ function Awards.Data.setMaxDice(n)
 end
 
 local function loadConfig()
-    local reader = getFileReader(CONFIG_FILE, true)
+    local reader = getFileReader(CONFIG_FILE, false)
     if not reader then return end
     local line = reader:readLine()
     while line do
@@ -109,7 +109,9 @@ function Awards.Data.save()
 end
 
 function Awards.Data.load()
-    local reader = getFileReader(AWARDS_FILE, true)
+    -- Pass false so a missing file returns nil (createIfNull=true would create
+    -- an empty file and hide the "no file yet" case, skipping the seed below).
+    local reader = getFileReader(AWARDS_FILE, false)
     if not reader then
         _awards = {}
         for _, v in ipairs(DEFAULT_AWARDS) do
