@@ -243,6 +243,23 @@ end
 AwardsHUDButton          = ISButton:derive("AwardsHUDButton")
 AwardsHUDButton.instance = nil
 
+-- Open/close the basic welcome panel. Kept as a standalone function so
+-- the HUD button can call it directly from onMouseUp instead of relying
+-- on ISButton's internal onclick (which the drag handler can suppress by
+-- nudging the button out from under the cursor mid-click).
+local function toggleWelcomePanel()
+    if awardsWelcomeWindow and awardsWelcomeWindow:isVisible() then
+        awardsWelcomeWindow:setVisible(false)
+        awardsWelcomeWindow:removeFromUIManager()
+    else
+        if not awardsWelcomeWindow then
+            CreateWelcomeWindow()
+        end
+        awardsWelcomeWindow:setVisible(true)
+        awardsWelcomeWindow:addToUIManager()
+    end
+end
+
 local HUD_BUTTON_POS_FILE = "ItemsAwards_hudButtonPos.txt"
 local HUD_BUTTON_DRAG_THRESHOLD = 3
 
@@ -270,18 +287,7 @@ local function loadHUDButtonPosition()
 end
 
 function AwardsHUDButton:new(x, y, width, height)
-    local o = ISButton:new(x, y, width, height, "", nil, function()
-        if awardsWelcomeWindow and awardsWelcomeWindow:isVisible() then
-            awardsWelcomeWindow:setVisible(false)
-            awardsWelcomeWindow:removeFromUIManager()
-        else
-            if not awardsWelcomeWindow then
-                CreateWelcomeWindow()
-            end
-            awardsWelcomeWindow:setVisible(true)
-            awardsWelcomeWindow:addToUIManager()
-        end
-    end)
+    local o = ISButton:new(x, y, width, height, "", nil, toggleWelcomePanel)
     setmetatable(o, self)
     self.__index = self
     o:setImage(getTexture("media/ui/icons/gift_regular_icon.png"))
@@ -313,12 +319,16 @@ end
 
 function AwardsHUDButton:onMouseUp(x, y)
     self.dragging = false
+    self.pressed  = false
     if self.dragMoved then
         self.dragMoved = false
         saveHUDButtonPosition(self:getX(), self:getY())
         return
     end
-    ISButton.onMouseUp(self, x, y)
+    -- Plain click (no drag): toggle the panel directly. We do NOT defer to
+    -- ISButton.onMouseUp/onclick because the drag handler may have nudged
+    -- the button off the cursor, which would make ISButton skip the click.
+    toggleWelcomePanel()
 end
 
 function AwardsHUDButton:onMouseUpOutside(x, y)
