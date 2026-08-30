@@ -3,7 +3,8 @@
 
     Provides:
       - AwardsWelcomeUI        floating panel with winners/losers lists
-      - AwardsHUDButton        HUD gift icon that toggles the panel
+      - OpenAwardsWelcomePanel() opens that panel (from the vanilla User
+                               Panel entry; see awardsUserPanel.lua)
       - AddAwardMessageToUI()  public helper called by awardsClient.lua
       - AddLoserMessageToUI()  public helper called by awardsClient.lua
       - AddAwardsLogMessage()  legacy compatibility stub
@@ -101,6 +102,12 @@ function AwardsWelcomeUI:create()
             PAD + halfW + PAD, row2Y, halfW, btnH,
             getText("UI_admin_manage"), self, AwardsWelcomeUI.onManageClick)
         self:addChild(self.manageButton)
+    else
+        -- Regular players get a read-only prize viewer in the same slot.
+        self.viewButton = ISButton:new(
+            PAD + halfW + PAD, row2Y, halfW, btnH,
+            getText("UI_view_prizes"), self, AwardsWelcomeUI.onViewClick)
+        self:addChild(self.viewButton)
     end
 
     local texClean = getTexture("media/ui/icons/clean.png")
@@ -162,6 +169,10 @@ end
 
 function AwardsWelcomeUI:onManageClick()
     if OpenAwardsAdminPanel then OpenAwardsAdminPanel() end
+end
+
+function AwardsWelcomeUI:onViewClick()
+    if OpenAwardsViewPanel then OpenAwardsViewPanel() end
 end
 
 function AwardsWelcomeUI:onAwardDoubleClick()
@@ -237,150 +248,19 @@ function CreateWelcomeWindow()
 end
 
 -- ============================================================
---  HUD Button (draggable, position persisted across sessions)
+--  Welcome panel access
 -- ============================================================
 
-AwardsHUDButton          = ISButton:derive("AwardsHUDButton")
-AwardsHUDButton.instance = nil
-
--- Open/close the basic welcome panel. Kept as a standalone function so
--- the HUD button can call it directly from onMouseUp instead of relying
--- on ISButton's internal onclick (which the drag handler can suppress by
--- nudging the button out from under the cursor mid-click).
-local function toggleWelcomePanel()
-    if awardsWelcomeWindow and awardsWelcomeWindow:isVisible() then
-        awardsWelcomeWindow:setVisible(false)
-        awardsWelcomeWindow:removeFromUIManager()
-    else
-        if not awardsWelcomeWindow then
-            CreateWelcomeWindow()
-        end
-        awardsWelcomeWindow:setVisible(true)
-        awardsWelcomeWindow:addToUIManager()
+-- Open the basic welcome panel (winners/losers log, plus the view/manage
+-- buttons). Invoked from the vanilla User Panel entry (awardsUserPanel.lua),
+-- which replaced the old floating HUD gift icon.
+function OpenAwardsWelcomePanel()
+    if not awardsWelcomeWindow then
+        CreateWelcomeWindow()
     end
-end
-
-local HUD_BUTTON_POS_FILE = "ItemsAwards_hudButtonPos.txt"
-local HUD_BUTTON_DRAG_THRESHOLD = 3
-
-local function clamp(value, minValue, maxValue)
-    if value < minValue then return minValue end
-    if value > maxValue then return maxValue end
-    return value
-end
-
-local function saveHUDButtonPosition(x, y)
-    local writer = getFileWriter(HUD_BUTTON_POS_FILE, true, false)
-    if not writer then return end
-    writer:write(tostring(math.floor(x)) .. "\n")
-    writer:write(tostring(math.floor(y)) .. "\n")
-    writer:close()
-end
-
-local function loadHUDButtonPosition()
-    local reader = getFileReader(HUD_BUTTON_POS_FILE, true)
-    if not reader then return nil, nil end
-    local lineX = reader:readLine()
-    local lineY = reader:readLine()
-    reader:close()
-    return lineX and tonumber(lineX), lineY and tonumber(lineY)
-end
-
-function AwardsHUDButton:new(x, y, width, height)
-    local o = ISButton:new(x, y, width, height, "", nil, toggleWelcomePanel)
-    setmetatable(o, self)
-    self.__index = self
-    o:setImage(getTexture("media/ui/icons/gift_regular_icon.png"))
-    o.backgroundColor          = {r=0, g=0, b=0, a=0}
-    o.backgroundColorMouseOver = {r=1, g=1, b=1, a=0.1}
-    o.borderColor              = {r=0, g=0, b=0, a=0}
-    o.dragging                 = false
-    o.dragMoved                = false
-    return o
-end
-
--- ---- Drag handling: hold the icon and move it; a plain click still
---      toggles the panel as before.
---
---      The button's own onMouseMove only fires while the cursor stays
---      over it, so a fast mouse movement outruns a small 32x32 icon
---      and the drag freezes. Instead, track the absolute mouse
---      position every tick (independent of hover) while dragging. ----
-
-function AwardsHUDButton:onMouseDown(x, y)
-    self.dragging        = true
-    self.dragMoved        = false
-    self.dragStartMouseX = getMouseX()
-    self.dragStartMouseY = getMouseY()
-    self.dragStartBtnX   = self:getX()
-    self.dragStartBtnY   = self:getY()
-    ISButton.onMouseDown(self, x, y)
-end
-
-function AwardsHUDButton:onMouseUp(x, y)
-    self.dragging = false
-    self.pressed  = false
-    if self.dragMoved then
-        self.dragMoved = false
-        saveHUDButtonPosition(self:getX(), self:getY())
-        return
-    end
-    -- Plain click (no drag): toggle the panel directly. We do NOT defer to
-    -- ISButton.onMouseUp/onclick because the drag handler may have nudged
-    -- the button off the cursor, which would make ISButton skip the click.
-    toggleWelcomePanel()
-end
-
-function AwardsHUDButton:onMouseUpOutside(x, y)
-    self.dragging = false
-    if self.dragMoved then
-        self.dragMoved = false
-        saveHUDButtonPosition(self:getX(), self:getY())
-    end
-    if ISButton.onMouseUpOutside then
-        ISButton.onMouseUpOutside(self, x, y)
-    end
-end
-
-local function updateHUDButtonDrag()
-    local btn = AwardsHUDButton.instance
-    if not btn or not btn.dragging then return end
-
-    local totalDX = getMouseX() - btn.dragStartMouseX
-    local totalDY = getMouseY() - btn.dragStartMouseY
-
-    if math.abs(totalDX) > HUD_BUTTON_DRAG_THRESHOLD or math.abs(totalDY) > HUD_BUTTON_DRAG_THRESHOLD then
-        btn.dragMoved = true
-    end
-
-    local maxX = getCore():getScreenWidth()  - btn:getWidth()
-    local maxY = getCore():getScreenHeight() - btn:getHeight()
-    btn:setX(clamp(btn.dragStartBtnX + totalDX, 0, maxX))
-    btn:setY(clamp(btn.dragStartBtnY + totalDY, 0, maxY))
-end
-
-Events.OnTick.Add(updateHUDButtonDrag)
-
-local function createHUDButton()
-    if AwardsHUDButton.instance then return end
-    local btnSize = 32
-
-    -- Default to the top-left corner: always on screen regardless of
-    -- resolution. Once the player drags the icon, the saved spot is
-    -- used instead (also clamped, in case the resolution changed since).
-    local maxX = getCore():getScreenWidth()  - btnSize
-    local maxY = getCore():getScreenHeight() - btnSize
-    local savedX, savedY = loadHUDButtonPosition()
-    local x = clamp(savedX or 18, 0, maxX)
-    local y = clamp(savedY or 698, 0, maxY)
-
-    -- No anchors: the button is positioned/persisted manually via drag,
-    -- and anchoring it to an edge fights setX()/setY() while dragging.
-    local btn = AwardsHUDButton:new(x, y, btnSize, btnSize)
-    btn.tooltip = getText("UI_awards_button_tooltip")
-    btn:initialise()
-    btn:addToUIManager()
-    AwardsHUDButton.instance = btn
+    awardsWelcomeWindow:setVisible(true)
+    awardsWelcomeWindow:addToUIManager()
+    awardsWelcomeWindow:bringToTop()
 end
 
 -- ============================================================
@@ -396,7 +276,6 @@ local function OnGameStart()
         Events.OnTick.Remove(tick)
     end
     Events.OnTick.Add(tick)
-    createHUDButton()
 end
 
 Events.OnGameStart.Add(OnGameStart)

@@ -40,5 +40,16 @@
     "UI_admin_set"            : "Aplicar",
     "UI_admin_err_maxdice"    : "El valor debe ser 2 o mayor.",
     "UI_admin_maxdice_set"    : "Dado máximo actualizado.",
-    "UI_admin_err_number_range" : "El número supera el dado máximo (%d)."
+    "UI_admin_err_number_range" : "El número supera el dado máximo (%d).",
+    "UI_admin_item_hint" : "Escribe al menos 2 letras para buscar ítems…",
+    "UI_userpanel_awards" : "Premios",
+    "UI_view_prizes" : "Ver premios",
+    "UI_view_title" : "Premios disponibles",
+    "UI_view_subtitle" : "Mata zombis para tirar el dado.",
+    "UI_view_subtitle2" : "Alcanza las muertes requeridas para desbloquear mejores premios.",
+    "UI_view_empty" : "Aún no hay premios configurados.",
+    "UI_view_dice" : "Dado %1/%2",
+    "UI_view_kills" : "Muertes %1+",
+    "UI_view_drop_zombie" : "Cae en el zombi",
+    "UI_view_drop_player" : "A tu inventario"
 }

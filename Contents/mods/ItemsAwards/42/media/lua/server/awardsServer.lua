@@ -91,6 +91,16 @@ local function sendAwardsList(player)
     notifyClient(player, "awardsList", {awards = list, maxDice = Awards.Data.getMaxDice()})
 end
 
+-- Same payload as sendAwardsList but routed to the read-only player viewer.
+-- Kept separate so it never touches the admin panel's list.
+local function sendAwardsView(player)
+    local list = {}
+    for i, v in ipairs(Awards.Data.getAll()) do
+        list[i] = {Item = v.Item, Number = v.Number, Count = v.Count, zkills = v.zkills, onZombie = v.onZombie}
+    end
+    notifyClient(player, "awardsView", {awards = list, maxDice = Awards.Data.getMaxDice()})
+end
+
 -- ============================================================
 --  Main logic: runs on every zombie death (server-side only)
 -- ============================================================
@@ -157,6 +167,12 @@ Events.OnZombieDead.Add(ZombKilled)
 -- ============================================================
 local function OnClientCommand(module, command, player, args)
     if module ~= "ItemsAwards" then return end
+
+    -- Public, read-only command: any player may view the prize table.
+    if command == "getAwardsView" then
+        sendAwardsView(player)
+        return
+    end
 
     if not playerIsAdmin(player) then return end
 

@@ -40,5 +40,16 @@
     "UI_admin_set"            : "Apply",
     "UI_admin_err_maxdice"    : "Value must be 2 or higher.",
     "UI_admin_maxdice_set"    : "Max dice updated.",
-    "UI_admin_err_number_range" : "Number exceeds max dice (%d)."
+    "UI_admin_err_number_range" : "Number exceeds max dice (%d).",
+    "UI_admin_item_hint" : "Type at least 2 letters to search items…",
+    "UI_userpanel_awards" : "Items Awards",
+    "UI_view_prizes" : "View prizes",
+    "UI_view_title" : "Available Prizes",
+    "UI_view_subtitle" : "Kill zombies to roll the dice.",
+    "UI_view_subtitle2" : "Reach the required kills to unlock better prizes.",
+    "UI_view_empty" : "No prizes configured yet.",
+    "UI_view_dice" : "Dice %1/%2",
+    "UI_view_kills" : "Kills %1+",
+    "UI_view_drop_zombie" : "Drops on the zombie",
+    "UI_view_drop_player" : "To your inventory"
 }

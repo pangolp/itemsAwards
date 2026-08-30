@@ -27,6 +27,11 @@ local COL_SEP  = 295
 local LIST_H   = 285
 local ROW_H    = 24
 
+-- Item autocomplete tuning
+local MAX_SUGGEST    = 60   -- cap results per search (keeps filtering cheap)
+local SUGGEST_ROWS   = 7    -- visible rows before the dropdown scrolls
+local SUGGEST_ROW_H  = 24
+
 -- ---- Helpers ----
 
 local function tx(key) return getText(key) end
@@ -60,6 +65,40 @@ local function getItemTex(itemType)
         end
     end)
     return tex
+end
+
+-- Cache of every game item, built lazily the first time the admin searches.
+-- Each entry: {full = "Base.Hammer", name = "Hammer", lfull/lname = lowercased,
+-- tex = inventory texture}. Sorted by display name for stable ordering.
+local _itemIndex = nil
+local function buildItemIndex()
+    if _itemIndex then return _itemIndex end
+    _itemIndex = {}
+    local sm = getScriptManager()
+    if not sm then return _itemIndex end
+    local all = sm:getAllItems()
+    if not all then return _itemIndex end
+    for i = 0, all:size() - 1 do
+        local it = all:get(i)
+        if it then
+            local ok, full = pcall(function() return it:getFullName() end)
+            if ok and full and full ~= "" then
+                local disp = full
+                pcall(function() disp = it:getDisplayName() or full end)
+                local tex
+                pcall(function() tex = it:getNormalTexture() end)
+                _itemIndex[#_itemIndex + 1] = {
+                    full  = full,
+                    name  = disp,
+                    lfull = string.lower(full),
+                    lname = string.lower(disp),
+                    tex   = tex,
+                }
+            end
+        end
+    end
+    table.sort(_itemIndex, function(a, b) return a.lname < b.lname end)
+    return _itemIndex
 end
 
 -- Override a button's render to draw a small icon at the left edge.
@@ -311,6 +350,36 @@ function AwardsAdminUI:buildUI()
     applyIcon(self.reloadBtn, texReload)
     applyIcon(self.closeBtn,  texClose)
 
+    -- ===== ITEM AUTOCOMPLETE =====
+    -- Dropdown of matching game items, shown while typing in the item box.
+    -- Added last so it renders (and receives clicks) above the form fields
+    -- it overlaps. Hidden until there is something to suggest.
+    self.itemEntry.tooltip = tx("UI_admin_item_hint")
+
+    local sx = self.itemEntry:getX()
+    local sy = self.itemEntry:getY() + self.itemEntry:getHeight() + 1
+    local sw = self.itemEntry:getWidth()
+    self.itemSuggest = ISScrollingListBox:new(sx, sy, sw, SUGGEST_ROWS * SUGGEST_ROW_H + 2)
+    self.itemSuggest:initialise()
+    self.itemSuggest:instantiate()
+    self.itemSuggest.itemheight = SUGGEST_ROW_H
+    self.itemSuggest.selected   = 0
+    self.itemSuggest.font        = UIFont.NewSmall
+    self.itemSuggest.drawBorder  = true
+    self.itemSuggest.doDrawItem  = AwardsAdminUI.drawSuggestRow
+    self.itemSuggest:setVisible(false)
+
+    local adminSelf = self
+    function self.itemSuggest:onMouseDown(mx, my)
+        ISScrollingListBox.onMouseDown(self, mx, my)
+        local sel = self.selected
+        if sel and sel > 0 and self.items[sel] and self.items[sel].item then
+            adminSelf:onSuggestPick(self.items[sel].item)
+        end
+        return true
+    end
+    self:addChild(self.itemSuggest)
+
     self:clearForm()
 end
 
@@ -351,6 +420,16 @@ function AwardsAdminUI:prerender()
         local g = self._statusIsErr and 0.3 or 1
         self:drawText(self._statusMsg, PAD, statusY + 18, r, g, 0.3, 1, UIFont.Small)
     end
+
+    -- Poll the item box for changes to drive the autocomplete. Cheaper and
+    -- more reliable than hooking every text-entry code path.
+    if self.itemEntry then
+        local cur = self.itemEntry:getText() or ""
+        if cur ~= (self._lastItemText or "") then
+            self._lastItemText = cur
+            self:refreshItemSuggestions()
+        end
+    end
 end
 
 function AwardsAdminUI:drawRow(y, item, alt)
@@ -379,6 +458,75 @@ function AwardsAdminUI:drawRow(y, item, alt)
     return y + self.itemheight
 end
 
+function AwardsAdminUI:drawSuggestRow(y, item, alt)
+    local d = item.item
+    local h = self.itemheight
+    if self.selected == item.index then
+        self:drawRect(0, y, self:getWidth(), h - 1, 0.5, 0.2, 0.4, 0.7)
+    end
+    self:drawRectBorder(0, y, self:getWidth(), h - 1, 0.35, 0.4, 0.4, 0.4)
+    local textX = 4
+    if d.tex then
+        local sz = h - 6
+        self:drawTextureScaledAspect(d.tex, 3, y + 3, sz, sz, 1, 1, 1, 1)
+        textX = sz + 7
+    end
+    self:drawText(d.name, textX, y + 4, 1, 1, 1, 1, self.font)
+    local nameW = getTextManager():MeasureStringX(self.font, d.name)
+    self:drawText(d.full, textX + nameW + 10, y + 4, 0.55, 0.6, 0.65, 1, self.font)
+    return y + h
+end
+
+-- ============================================================
+--  Item autocomplete
+-- ============================================================
+
+-- Rebuild the suggestion dropdown from the current item-box text. Called
+-- from prerender whenever the text changed, so it works for typing, paste
+-- and programmatic edits alike.
+function AwardsAdminUI:refreshItemSuggestions()
+    local box = self.itemSuggest
+    if not box then return end
+    box:clear()
+
+    local text = self.itemEntry:getText() or ""
+    if #text < 2 then
+        box:setVisible(false)
+        return
+    end
+
+    local needle = string.lower(text)
+    local index  = buildItemIndex()
+    local n = 0
+    for _, it in ipairs(index) do
+        if string.find(it.lname, needle, 1, true) or string.find(it.lfull, needle, 1, true) then
+            box:addItem(it.name, it)
+            n = n + 1
+            if n >= MAX_SUGGEST then break end
+        end
+    end
+
+    if n > 0 then
+        local rows = math.min(n, SUGGEST_ROWS)
+        box:setHeight(rows * box.itemheight + 2)
+        box.selected = 0
+        box:setVisible(true)
+    else
+        box:setVisible(false)
+    end
+end
+
+-- An item was clicked in the dropdown: drop its full type into the box and
+-- close the list. _lastItemText is synced so prerender does not reopen it.
+function AwardsAdminUI:onSuggestPick(data)
+    if not data then return end
+    self.itemEntry:setText(data.full)
+    self._lastItemText = data.full
+    self.itemSuggest:setVisible(false)
+    self.itemSuggest:clear()
+    self:setStatus(nil, false)
+end
+
 -- ============================================================
 --  List
 -- ============================================================
@@ -403,6 +551,8 @@ end
 
 function AwardsAdminUI:fillForm(entry)
     self.itemEntry:setText(entry.Item or "")
+    self._lastItemText = entry.Item or ""   -- don't reopen the dropdown on edit
+    if self.itemSuggest then self.itemSuggest:setVisible(false) end
     self.numberEntry:setText(tostring(entry.Number or ""))
     self.countEntry:setText(tostring(entry.Count or "1"))
     self.zkillsEntry:setText(tostring(entry.zkills or "1"))
@@ -412,6 +562,11 @@ end
 
 function AwardsAdminUI:clearForm()
     self.itemEntry:setText("")
+    self._lastItemText = ""
+    if self.itemSuggest then
+        self.itemSuggest:clear()
+        self.itemSuggest:setVisible(false)
+    end
     self.numberEntry:setText("")
     self.countEntry:setText("1")
     self.zkillsEntry:setText("1")
