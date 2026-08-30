@@ -49,8 +49,23 @@ local function loadConfig()
     reader:close()
 end
 
+-- Seed prizes so the mod ships with something to win out of the box.
+-- Admins can edit/remove these from the in-game panel; they are only written
+-- the first time, when no awards file exists yet. Numbers are unique slots in
+-- [1, maxDice] (default 100); zkills gates each prize behind a kill count so
+-- better loot arrives later. Weapons drop on the zombie body (onZombie = true).
 local DEFAULT_AWARDS = {
-    {Item = "Base.Money", Number = 50, Count = 1, zkills = 1, onZombie = false},
+    {Item = "Base.Bandage",     Number = 10,  Count = 2,  zkills = 1,   onZombie = false},
+    {Item = "Base.Money",       Number = 25,  Count = 5,  zkills = 3,   onZombie = false},
+    {Item = "Base.TinnedBeans", Number = 40,  Count = 1,  zkills = 10,  onZombie = false},
+    {Item = "Base.Nails",       Number = 50,  Count = 10, zkills = 15,  onZombie = false},
+    {Item = "Base.Screwdriver", Number = 60,  Count = 1,  zkills = 25,  onZombie = false},
+    {Item = "Base.Hammer",      Number = 65,  Count = 1,  zkills = 30,  onZombie = false},
+    {Item = "Base.HuntingKnife",Number = 75,  Count = 1,  zkills = 50,  onZombie = true},
+    {Item = "Base.BaseballBat", Number = 85,  Count = 1,  zkills = 75,  onZombie = true},
+    {Item = "Base.Axe",         Number = 95,  Count = 1,  zkills = 100, onZombie = true},
+    {Item = "Base.Pistol",      Number = 99,  Count = 1,  zkills = 150, onZombie = true},
+    {Item = "Base.Bullets9mm",  Number = 100, Count = 15, zkills = 150, onZombie = true},
 }
 
 -- ---- Serialization ----
