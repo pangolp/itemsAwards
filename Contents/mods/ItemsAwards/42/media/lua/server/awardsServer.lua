@@ -134,17 +134,15 @@ local function ZombKilled(zombie)
 
                 logAward(attacker, number, Awards.Data.getMaxDice(), value.Item, value.Count, value.onZombie, countZombieKill, value.zkills)
 
-                local itemName = getItemNameFromFullType and getItemNameFromFullType(value.Item) or value.Item
-
                 notifyClient(attacker, "award", {
                     item     = value.Item,
-                    message  = getText("IGUI_WonItem",    itemName, value.Count),
-                    uiMsg    = getText("UI_awardMessage", itemName, value.Count),
+                    count    = value.Count,
                     onZombie = value.onZombie,
                 })
             else
                 notifyClient(attacker, "needKills", {
-                    message = getText("IGUI_YouNeedMoreKills", number, value.zkills),
+                    number = number,
+                    zkills = value.zkills,
                 })
             end
 
@@ -155,7 +153,7 @@ local function ZombKilled(zombie)
 
     if not won then
         notifyClient(attacker, "loser", {
-            message = getText("IGUI_LoseItem", number),
+            number = number,
         })
     end
 end

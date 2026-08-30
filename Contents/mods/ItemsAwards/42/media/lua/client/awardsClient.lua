@@ -62,9 +62,10 @@ function Awards.Client.onServerCommand(command, args)
     if not args then return end
 
     if command == "award" then
+        local itemName  = (getItemNameFromFullType and getItemNameFromFullType(args.item)) or args.item
         local placement = getText(args.onZombie and "IGUI_PlacementZombie" or "IGUI_PlacementInventory")
-        local msg   = args.message .. " " .. placement
-        local uiMsg = (args.uiMsg or args.message) .. " " .. placement
+        local msg   = getText("IGUI_WonItem",    itemName, args.count) .. " " .. placement
+        local uiMsg = getText("UI_awardMessage", itemName, args.count) .. " " .. placement
         showMessage(msg, false)
         if AddAwardsLogMessage then
             AddAwardsLogMessage(uiMsg)
@@ -74,17 +75,19 @@ function Awards.Client.onServerCommand(command, args)
         end
 
     elseif command == "needKills" then
-        showMessage(args.message, true)
+        local msg = getText("IGUI_YouNeedMoreKills", args.number, args.zkills)
+        showMessage(msg, true)
         if AddLoserMessageToUI then
-            AddLoserMessageToUI(args.message)
+            AddLoserMessageToUI(msg)
         end
 
     elseif command == "loser" then
+        local msg = getText("IGUI_LoseItem", args.number)
         if Awards.Options.showNumberWhenLosing then
-            showMessage(args.message, true)
+            showMessage(msg, true)
         end
         if AddLoserMessageToUI then
-            AddLoserMessageToUI(args.message)
+            AddLoserMessageToUI(msg)
         end
 
     elseif command == "awardsList" then
