@@ -3,9 +3,6 @@
     Uses PZAPI.ModOptions introduced in B42.
 --]]
 
--- Guard: B42 only. B41 may scan common/ subdirectories and reach this file.
-if not PZAPI then return end
-
 -- Guard: skip on dedicated server (no client context)
 if isServer() and not isClient() then return end
 

@@ -1,5 +1,5 @@
 --[[
-    ItemsAwards - Client Module (Build 41)
+    ItemsAwards - Client Module (Build 42)
 
     Responsibilities:
       - Listen for commands sent by the server via OnServerCommand.
@@ -16,8 +16,7 @@ if isServer() and not isClient() then return end
 
 Awards = Awards or {}
 
--- Guard: this file can end up loaded as more than one physical copy
--- (e.g. root + common/ paths on B41). Only register everything once.
+-- Guard: only register everything once.
 if Awards._clientLoaded then return end
 Awards._clientLoaded = true
 
@@ -105,4 +104,4 @@ end
 
 Events.OnServerCommand.Add(OnServerCommand)
 
-print("[ItemsAwards] Client module loaded (B41).")
+print("[ItemsAwards] Client module loaded.")

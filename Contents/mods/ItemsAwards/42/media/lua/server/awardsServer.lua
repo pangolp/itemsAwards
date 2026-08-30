@@ -1,5 +1,5 @@
 --[[
-    ItemsAwards - Server Module (Build 41)
+    ItemsAwards - Server Module (Build 42)
     Runs ONLY on the server (dedicated, host, or single-player).
 
     Flow:
@@ -11,7 +11,8 @@
     Awards table is managed by awardsData.lua (loaded before this file).
 --]]
 
--- Guard: only run in server context (includes single-player host)
+-- Server-only guard: skip on a pure client (dedicated server, coop host and
+-- single-player all pass). Never add a PZAPI guard here: PZAPI is client-only.
 if isClient() and not isServer() then return end
 
 Awards = Awards or {}
@@ -22,15 +23,12 @@ Awards._serverLoaded = true
 Awards.Server = Awards.Server or {}
 
 -- ============================================================
---  Helper: add item to player inventory and sync to clients
+--  Helper: add item to player inventory
 -- ============================================================
 local function giveItemToPlayer(player, itemType, count)
     local inv = player:getInventory()
     for i = 1, count do
-        local item = inv:AddItem(itemType)
-        if sendAddItemToContainer then
-            sendAddItemToContainer(inv, item)
-        end
+        inv:AddItem(itemType)
     end
 end
 
@@ -75,9 +73,9 @@ end
 local function playerIsAdmin(player)
     local level = player:getAccessLevel()
     if level == "admin" or level == "moderator" then return true end
-    -- B41 SP: getOnlinePlayers() returns nil (no network stack)
-    if getOnlinePlayers() == nil then return true end
-    -- Coop host: isClient()=true, server and client share the same process
+    -- SP: not isClient() and not isServer(); no access levels, player is always admin
+    if not isClient() and not isServer() then return true end
+    -- Coop host: isServer()=true AND isClient()=true; identify by local player
     if isClient() then
         local localPlayer = getPlayer and getPlayer()
         return localPlayer ~= nil and localPlayer == player
@@ -130,13 +128,13 @@ local function ZombKilled(zombie)
 
                 notifyClient(attacker, "award", {
                     item     = value.Item,
-                    message  = string.format(getText("IGUI_WonItem"),    itemName, value.Count),
-                    uiMsg    = string.format(getText("UI_awardMessage"), itemName, value.Count),
+                    message  = getText("IGUI_WonItem",    itemName, value.Count),
+                    uiMsg    = getText("UI_awardMessage", itemName, value.Count),
                     onZombie = value.onZombie,
                 })
             else
                 notifyClient(attacker, "needKills", {
-                    message = string.format(getText("IGUI_YouNeedMoreKills"), number, value.zkills),
+                    message = getText("IGUI_YouNeedMoreKills", number, value.zkills),
                 })
             end
 
@@ -147,7 +145,7 @@ local function ZombKilled(zombie)
 
     if not won then
         notifyClient(attacker, "loser", {
-            message = string.format(getText("IGUI_LoseItem"), number),
+            message = getText("IGUI_LoseItem", number),
         })
     end
 end
@@ -209,4 +207,4 @@ end
 
 Events.OnClientCommand.Add(OnClientCommand)
 
-print("[ItemsAwards] Server module loaded (B41).")
+print("[ItemsAwards] Server module loaded (B42).")

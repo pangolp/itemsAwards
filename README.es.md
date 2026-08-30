@@ -4,7 +4,7 @@
 
 ![20250424210041_1](https://github.com/user-attachments/assets/20568750-2f27-4635-8e4b-42f986b1a7c1)
 
-Mod para Project Zomboid compatible con **Build 41** y **Build 42**. Cada vez que un jugador mata a un zombi, el servidor tira un número aleatorio entre 1 y un máximo configurable (por defecto 100). Si coincide con uno de los números de premio configurados y el jugador tiene suficientes kills, recibe un ítem — ya sea directamente en su inventario o colocado en el cuerpo del zombi para que lo saquee.
+Mod para Project Zomboid para **Build 42**. Cada vez que un jugador mata a un zombi, el servidor tira un número aleatorio entre 1 y un máximo configurable (por defecto 100). Si coincide con uno de los números de premio configurados y el jugador tiene suficientes kills, recibe un ítem — ya sea directamente en su inventario o colocado en el cuerpo del zombi para que lo saquee.
 
 Toda la lógica de premios corre en el **servidor** (autoritativo). El cliente solo muestra notificaciones y un panel de historial.
 
@@ -70,47 +70,29 @@ Todos los archivos viven en `Zomboid/Lua/` (o la carpeta equivalente en un servi
 
 ## Estructura de carpetas
 
-Build 41 lee directamente desde `media/` en la raíz. Build 42 usa un mecanismo de "version merge": lee `common/` como capa base, luego `42/` como overrides. Ambas builds tienen **código nativo completamente separado** — sin shims de compatibilidad.
+Build 42 reconoce la carpeta como mod porque existe `42/mod.info` (un `mod.info` en la raíz del mod **no** se detecta). Todo el contenido vive bajo `42/`.
 
 ```
 Contents/mods/ItemsAwards/
-|-- mod.info                    B41: descriptor del mod en la raíz
-|-- itemsAwards.png
-|-- media/                      Solo Build 41 (código nativo B41)
-|   |-- lua/
-|   |   |-- client/
-|   |   |   |-- UI/awardsUI.lua         (panel del jugador + botón HUD)
-|   |   |   |-- UI/awardsAdminUI.lua    (panel CRUD del admin)
-|   |   |   |-- awardsClient.lua
-|   |   |   `-- awardsOptions.lua       (ModOptions API legacy)
-|   |   |-- server/
-|   |   |   |-- awardsData.lua          (persistencia de premios y config)
-|   |   |   `-- awardsServer.lua        (lógica de roll, comandos)
-|   |   `-- shared/Translate/
-|   |       `-- AR | EN | ES  (*.txt)
-|   `-- ui/icons/               (íconos de botones)
-|-- common/                     Solo Build 42 (código nativo B42)
-|   |-- mod.info
-|   |-- itemsAwards.png
-|   |-- media/
-|   |   |-- lua/
-|   |   |   |-- client/
-|   |   |   |   |-- UI/awardsUI.lua
-|   |   |   |   |-- UI/awardsAdminUI.lua
-|   |   |   |   |-- awardsClient.lua
-|   |   |   |   `-- awardsOptions.lua   (PZAPI.ModOptions)
-|   |   |   |-- server/
-|   |   |   |   |-- awardsData.lua
-|   |   |   |   `-- awardsServer.lua
-|   |   |   `-- shared/Translate/
-|   |   |       `-- AR | EN | ES  (*.json)
-|   |   `-- ui/icons/
-`-- 42/                         Solo marcador para Build 42
-    |-- mod.info
-    `-- itemsAwards.png
+`-- 42/
+    |-- mod.info                    descriptor del mod (obligatorio, acá)
+    |-- itemsAwards.png             poster (junto al mod.info)
+    `-- media/
+        |-- lua/
+        |   |-- client/
+        |   |   |-- UI/awardsUI.lua         (panel del jugador + botón HUD)
+        |   |   |-- UI/awardsAdminUI.lua    (panel CRUD del admin)
+        |   |   |-- awardsClient.lua
+        |   |   `-- awardsOptions.lua       (PZAPI.ModOptions)
+        |   |-- server/
+        |   |   |-- awardsData.lua          (persistencia de premios y config)
+        |   |   `-- awardsServer.lua        (lógica de roll, comandos)
+        |   `-- shared/Translate/
+        |       `-- AR | EN | ES  (*.json)
+        `-- ui/icons/               (íconos de botones)
 ```
 
-> Si agregás una clave de traducción, hacelo en **ambos**: `media/shared/Translate/` (B41, formato `.txt` tabla Lua) y `common/media/lua/shared/Translate/` (B42, formato `.json`). No hay ningún paso de sincronización automática. B42 usa placeholders `%1`/`%2`; B41 usa `%s`/`%d` con `string.format`.
+> Si agregás una clave de traducción, hacelo en los tres idiomas bajo `42/media/lua/shared/Translate/` (formato `.json`). B42 usa placeholders `%1`/`%2` vía `getText(key, arg)`.
 
 ## Enlaces
 

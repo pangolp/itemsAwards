@@ -1,7 +1,7 @@
 # AGENTS.md — Items Awards (Project Zomboid mod)
 
-Guía para trabajar en este repo. Léela antes de tocar código: el mod soporta
-Build 41 **y** Build 42, y la estructura de carpetas es la parte más importante
+Guía para trabajar en este repo. Léela antes de tocar código: el mod es
+**solo Build 42** y la estructura de carpetas es la parte más importante
 de entender.
 
 ## Qué hace el mod
@@ -20,45 +20,44 @@ solo pinta UI y no decide nada.
 
 ## Estructura de carpetas (el punto más importante)
 
-Project Zomboid Build 41 lee el mod **directamente** desde
-`Contents/mods/ItemsAwards/media/` (raíz). Build 42 usa un mecanismo de
-"version merge": lee `common/media/` (base) y luego `42/media/` (overrides).
+El mod es **solo Build 42**. B42 reconoce la carpeta como mod porque existe
+`42/mod.info` — un `mod.info` en la raíz del mod **NO** lo detecta B42. Todo el
+contenido vive bajo `42/`.
 
 ```
 Contents/mods/ItemsAwards/
-├── mod.info, media/...      ← B41 ÚNICAMENTE (código B41 nativo)
-├── common/
-│   ├── mod.info, media/...  ← B42 ÚNICAMENTE (código B42 nativo)
 └── 42/
-    ├── mod.info             ← marcador de compatibilidad B42
-    └── itemsAwards.png
+    ├── mod.info             ← metadatos del mod (obligatorio, acá dentro)
+    ├── itemsAwards.png      ← poster (junto al mod.info)
+    └── media/
+        ├── lua/{client,server,shared}
+        └── ui/icons
 ```
 
-**B41 lee SOLO `media/` de la raíz. B42 lee SOLO `common/` + `42/`.
-No hay código compartido entre las dos builds.**
+Si en el futuro hiciera falta soportar otra versión del juego, se agrega una
+carpeta `common/` (con su `common/mod.info` y `common/media/`) para lo
+compartido; el juego carga `common/` **más** `42/`. Hoy no hace falta: alcanza
+con `42/`.
 
-Los archivos de cliente en `common/` empiezan con `if not PZAPI then return end`
-para que B41 no los ejecute si escanea subdirectorios. Los archivos de
-**servidor** en `common/` usan solo `if isClient() and not isServer() then return end`
-— en el servidor PZAPI no está disponible, así que nunca poner ese guard en
-archivos server-side.
+Los archivos de **servidor** usan `if isClient() and not isServer() then return end`
+como guard — en el servidor PZAPI no está disponible, así que **nunca** poner un
+guard `if not PZAPI` en archivos server-side.
 
-## Diferencias B41 vs B42 — dónde vive cada cosa
+## Notas de API B42 — cómo se hacen algunas cosas
 
-| Tema | B41 (`media/`) | B42 (`common/`) |
-|---|---|---|
-| Opciones de mod | `awardsOptions.lua` con `ModOptions:getInstance()` | `awardsOptions.lua` con `PZAPI.ModOptions:create()` |
-| `getText` con placeholders | `string.format(getText(key), ...)` con `%s/%d` | `getText(key, arg1, arg2)` variádico con `%1/%2` |
-| Textura de ítem en la UI | `InventoryItemFactory.CreateItem(item):getTex()` | `getScriptManager():getItem(item):getNormalTexture()` |
-| Traducciones | `.txt` tabla Lua en `media/lua/shared/Translate/{EN,ES,AR}/UI_EN.txt` etc. | `.json` en `common/media/lua/shared/Translate/{EN,ES,AR}/UI.json` |
-| Sync de inv. al dar ítem | `sendAddItemToContainer(inv, item)` | no necesario (B42 lo maneja) |
-| Guard de cliente en common/ | N/A | `if not PZAPI then return end` al inicio |
+| Tema | B42 |
+|---|---|
+| Opciones de mod | `awardsOptions.lua` con `PZAPI.ModOptions:create()` |
+| `getText` con placeholders | `getText(key, arg1, arg2)` variádico con `%1/%2` |
+| Textura de ítem en la UI | `getScriptManager():getItem(item):getNormalTexture()` |
+| Traducciones | `.json` en `42/media/lua/shared/Translate/{EN,ES,AR}/UI.json` |
+| Sync de inv. al dar ítem | no necesario (B42 lo maneja) |
 
-**Importante**: al agregar una clave de traducción, editá **ambos** archivos. Los formatos son distintos: B41 usa tabla Lua (`UI_ES = { key = "value" }`), B42 usa JSON puro (`{ "key": "value" }`). Los placeholders también difieren: B41 `%s`/`%d` con `string.format`, B42 `%1`/`%2` con `getText(key, arg)` — aunque si el código B42 usa `string.format` para armar el string antes de llamar `setText/setStatus`, los placeholders siguen siendo `%s`/`%d`.
-
-Cada diferencia vive en el archivo nativo de su build, sin shims de
-compatibilidad. Si necesitás cambiar algo en ambas builds, editá el archivo
-correspondiente en `media/` **Y** el archivo correspondiente en `common/`.
+**Importante**: al agregar una clave de traducción, editala en los tres idiomas
+(AR/EN/ES). Los archivos son JSON plano (`{ "key": "value" }`) con placeholders
+`%1`/`%2` vía `getText(key, arg)` — salvo que el código arme el string con
+`string.format` antes de `setText/setStatus`, en cuyo caso siguen siendo
+`%s`/`%d`.
 
 ## Módulos y carga
 
@@ -161,8 +160,7 @@ y refresca la UI sin pasar por red.
 ## Íconos de botones
 
 Los íconos se aplican con `applyIcon(btn, tex)`, que parchea `btn.render` para
-dibujar la textura a la izquierda del texto. Están en `media/ui/icons/` y en
-`common/media/ui/icons/`:
+dibujar la textura a la izquierda del texto. Están en `42/media/ui/icons/`:
 
 | Archivo | Botón |
 |---|---|
@@ -185,10 +183,10 @@ Los botones de `AwardsWelcomeUI` usan un layout de 2 filas × 2 columnas
 
 No hay tests automatizados ni build step.
 
-1. Cargar el mod en Project Zomboid (B41 y/o B42) y matar un zombi en
+1. Cargar el mod en Project Zomboid (Build 42) y matar un zombi en
    single-player para verificar el roll y el mensaje de UI.
-2. Revisar la consola del juego: ambos módulos imprimen
-   `[ItemsAwards] ... loaded (B41/B42).` al cargar.
+2. Revisar la consola del juego: los módulos imprimen
+   `[ItemsAwards] ... loaded (B42).` al cargar.
 3. Verificar `Zomboid/Lua/ItemsAwards_winners_log.txt` para confirmar que el
    log se escribe correctamente al ganar.
 4. Abrir el panel admin y probar: agregar un premio con número > maxDice (debe
@@ -202,15 +200,12 @@ No hay tests automatizados ni build step.
 - El servidor es la única fuente de verdad para si se gana o no; nunca muevas
   lógica de decisión al cliente.
 - Cualquier string visible al jugador va a `Translate/<idioma>/...`, nunca
-  hardcodeado en `.lua`. Hay que agregar la clave en los tres idiomas (AR/EN/ES)
-  y en ambas carpetas de traducción (`media/` y `common/`).
+  hardcodeado en `.lua`. Hay que agregar la clave en los tres idiomas (AR/EN/ES).
 - No elimines los guards de carga única (`Awards._serverLoaded`,
   `Awards._clientLoaded`, `Awards._dataLoaded`, `Awards._optionsLoaded`) ni el
   guard `isClient()/isServer()` al inicio de cada archivo de servidor.
-- No elimines `if not PZAPI then return end` de los archivos de **cliente** en
-  `common/`. No lo agregues a los archivos de **servidor** en `common/`.
-- La carpeta `42/` solo tiene `mod.info` e `itemsAwards.png`. No agregar código
-  ahí a menos que sea un override real de un archivo de `common/`.
+- No agregues un guard `if not PZAPI` a los archivos de **servidor** (PZAPI es
+  solo cliente; en el servidor no existe y cortaría la carga del módulo).
 - Si editás premios o config vía `Awards.Data`, siempre llamar `.save()` /
   `setMaxDice()` para persistir — nunca modificar `_awards` o `_maxDice`
   directamente.

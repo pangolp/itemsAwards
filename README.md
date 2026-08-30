@@ -4,7 +4,7 @@
 
 ![20250424210041_1](https://github.com/user-attachments/assets/20568750-2f27-4635-8e4b-42f986b1a7c1)
 
-A Project Zomboid mod compatible with **Build 41** and **Build 42**. Every time a player kills a zombie, the server rolls a random number between 1 and a configurable maximum (default 100). If it matches one of the configured prize numbers and the player has enough kills, they receive an item — either directly in their inventory or placed on the zombie's body for them to loot.
+A Project Zomboid mod for **Build 42**. Every time a player kills a zombie, the server rolls a random number between 1 and a configurable maximum (default 100). If it matches one of the configured prize numbers and the player has enough kills, they receive an item — either directly in their inventory or placed on the zombie's body for them to loot.
 
 All reward logic runs on the **server** (authoritative). The client only displays notifications and a history panel.
 
@@ -70,47 +70,29 @@ All files live in `Zomboid/Lua/` (or the equivalent folder on a dedicated server
 
 ## Folder structure
 
-Build 41 reads directly from `media/` at the root. Build 42 uses a version-merge mechanism: it reads `common/` as the base layer, then `42/` for overrides. Both builds have **completely separate native code** — no compatibility shims.
+Build 42 only recognizes the folder as a mod because `42/mod.info` exists (a `mod.info` at the mod root is **not** detected). All content lives under `42/`.
 
 ```
 Contents/mods/ItemsAwards/
-|-- mod.info                    B41: root mod descriptor
-|-- itemsAwards.png
-|-- media/                      Build 41 only (native B41 code)
-|   |-- lua/
-|   |   |-- client/
-|   |   |   |-- UI/awardsUI.lua         (player panel + HUD button)
-|   |   |   |-- UI/awardsAdminUI.lua    (admin CRUD panel)
-|   |   |   |-- awardsClient.lua
-|   |   |   `-- awardsOptions.lua       (ModOptions legacy API)
-|   |   |-- server/
-|   |   |   |-- awardsData.lua          (prize table + config persistence)
-|   |   |   `-- awardsServer.lua        (roll logic, commands)
-|   |   `-- shared/Translate/
-|   |       `-- AR | EN | ES  (*.txt)
-|   `-- ui/icons/               (button icons)
-|-- common/                     Build 42 only (native B42 code)
-|   |-- mod.info
-|   |-- itemsAwards.png
-|   |-- media/
-|   |   |-- lua/
-|   |   |   |-- client/
-|   |   |   |   |-- UI/awardsUI.lua
-|   |   |   |   |-- UI/awardsAdminUI.lua
-|   |   |   |   |-- awardsClient.lua
-|   |   |   |   `-- awardsOptions.lua   (PZAPI.ModOptions)
-|   |   |   |-- server/
-|   |   |   |   |-- awardsData.lua
-|   |   |   |   `-- awardsServer.lua
-|   |   |   `-- shared/Translate/
-|   |   |       `-- AR | EN | ES  (*.json)
-|   |   `-- ui/icons/
-`-- 42/                         Build 42 marker only
-    |-- mod.info
-    `-- itemsAwards.png
+`-- 42/
+    |-- mod.info                    mod descriptor (required, here)
+    |-- itemsAwards.png             poster (next to mod.info)
+    `-- media/
+        |-- lua/
+        |   |-- client/
+        |   |   |-- UI/awardsUI.lua         (player panel + HUD button)
+        |   |   |-- UI/awardsAdminUI.lua    (admin CRUD panel)
+        |   |   |-- awardsClient.lua
+        |   |   `-- awardsOptions.lua       (PZAPI.ModOptions)
+        |   |-- server/
+        |   |   |-- awardsData.lua          (prize table + config persistence)
+        |   |   `-- awardsServer.lua        (roll logic, commands)
+        |   `-- shared/Translate/
+        |       `-- AR | EN | ES  (*.json)
+        `-- ui/icons/               (button icons)
 ```
 
-> If you add a translation key, do it in **both** `media/shared/Translate/` (B41, `.txt` Lua table format) and `common/media/lua/shared/Translate/` (B42, `.json` format). There is no sync step. B42 uses `%1`/`%2` placeholders; B41 uses `%s`/`%d` with `string.format`.
+> If you add a translation key, add it to all three languages under `42/media/lua/shared/Translate/` (`.json` format). B42 uses `%1`/`%2` placeholders via `getText(key, arg)`.
 
 ## Links
 

@@ -1,9 +1,11 @@
 --[[
-    ItemsAwards - Data Module (Build 41)
+    ItemsAwards - Data Module (Build 42)
     Loads and saves the awards table from/to a CSV file on the server.
     Exposes Awards.Data for other server modules to read and mutate prizes.
 --]]
 
+-- Server-only guard: skip on a pure client (dedicated server, coop host and
+-- single-player all pass). Never add a PZAPI guard here: PZAPI is client-only.
 if isClient() and not isServer() then return end
 
 Awards = Awards or {}
@@ -151,4 +153,4 @@ end
 loadConfig()
 Awards.Data.load()
 
-print("[ItemsAwards] Data module loaded (B41).")
+print("[ItemsAwards] Data module loaded (B42).")

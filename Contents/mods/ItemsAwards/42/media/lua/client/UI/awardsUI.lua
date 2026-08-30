@@ -1,5 +1,5 @@
 --[[
-    ItemsAwards - UI Module (Build 41 + 42 common)
+    ItemsAwards - UI Module (Build 42)
 
     Provides:
       - AwardsWelcomeUI        floating panel with winners/losers lists
@@ -177,11 +177,12 @@ function AwardsWelcomeUI:addAwardMessage(_item, _message)
     local limit = (Awards.Options and Awards.Options.limitWinningNumbers or 1) * 5
     local icon  = nil
 
-    -- B41 style: InventoryItemFactory.CreateItem
     if _item then
-        local ok, obj = pcall(InventoryItemFactory.CreateItem, _item)
-        if ok and obj then
-            icon = obj:getTex()
+        local ok, script = pcall(function()
+            return getScriptManager():getItem(_item)
+        end)
+        if ok and script then
+            icon = script:getNormalTexture()
         end
     end
 
